@@ -497,7 +497,7 @@ const STORY_DATA = {
   meta: {
     title: "НАБЛЮДАТЕЛИ АНДРОМЕДЫ", sub: "Книга-игра о тех, кто решил остаться",
     blurb: "Океан был холодным, мокрым и совершенно равнодушным. Корабль, которому полагалось лишь посмотреть на Землю издали, рухнул в него на скорости, о которой лучше не думать. Уцелели двое: Наблюдатель Аэ́рхис, умный, упрямый и сильно недооценивший планету, и вы, Лиор’Саэн, молчаливый стеклянный спутник со светом в трещинах. Рук у вас нет. Голоса нет. Зато есть дар видеть, куда ведут нити судьбы, и привычка светить там, где другие уже сдались. Люди, которых вы собирались изучать, вытащили вас из воды раньше, чем успели задать вопросы. Вопросы придут позже. Неудобные.",
-    facts: "Авторская книга-игра · 19 глав и 4 варианта эпилога · пагинация рассчитывается автоматически: 1600 символов = 1 страница",
+    facts: "Авторская книга-игра · 19 глав и 4 варианта эпилога",
     totalPages: 377, // только верхняя граница для миграции старых сохранений; интерфейс считает объём по фактическому тексту
     chapters: [
       { no: 1, title: "Ледяная бездна", pages: "динамически", ready: true, sum: "Падение из Андромеды, ледяной океан, спасение экипажем «Северного горизонта» и первые часы в судовом лазарете." },
@@ -5335,7 +5335,7 @@ function migrateDossiersForLegacySave() {
 
 /* ===================== ДВИЖОК ===================== */
 const SK = ["Наблюдение","Интуиция","Память","Эмпатия","Язык","Навигация","Выживание","Ремесло","Скрытность","Медицина"];
-const KEY = "velnoktari_book_save_v1", MAXINV = 8, CHAT_MAX = 50;
+const KEY = "velnoktari_book_save_v1", MAXINV = 8, CHAT_MAX = 2000, ROUTE_TRANSCRIPT_MAX = 50;
 const LB = STORY_DATA.meta.labels;
 const R = { hp: { l: LB.hp, max: 20, u: "" }, o2: { l: LB.o2, max: 100, u: "%" }, en: { l: LB.en, max: 100, u: "%" }, ammo: { l: LB.ammo, max: 99, u: "" } };
 const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
@@ -5922,13 +5922,16 @@ $("#cont").onclick = () => {
   if (!Array.isArray(st.chat)) st.chat = [];
   st.chat.forEach(m => {
     if (!m || typeof m !== "object") return;
-    if (typeof m.t !== "string") m.t = savedMessageText(m);
+    if (typeof m.t !== "string" || !m.t.trim()) m.t = savedMessageText(m);
+    if (!m.k) m.k = m.kind || m.type || (isSpeechText(m.t || "") ? "spk" : "nar");
+    if (!m.kind) m.kind = m.k;
     if (m.k === "in") {
       const dialogue = isSpeechText(m.t || "") || !!m.f || !!m.from || !!m.speaker;
       m.k = dialogue ? "spk" : "nar";
       if (dialogue && !isSpeechText(m.t || "")) m.t = "— " + (m.t || "");
     }
     if (m.k === "spk" && !cleanSavedBody(m.t || "")) m.__dropEmptyLegacy = true;
+    m.kind = m.k;
   });
   const chatBeforeCleanup = st.chat.length;
   st.chat = st.chat.filter(m => !m || !m.__dropEmptyLegacy);
@@ -5936,8 +5939,12 @@ $("#cont").onclick = () => {
   if (!Array.isArray(st.queue)) st.queue = [];
   st.queue.forEach(q => {
     if (!q || typeof q !== "object") return;
-    if (typeof q.t !== "string" || !q.t.trim()) q.t = savedMessageText(q);
+    if (typeof q.t !== "string" || !q.t.trim() || !cleanSavedBody(q.t)) {
+      const recoveredText = savedMessageText(q);
+      if (recoveredText && cleanSavedBody(recoveredText)) q.t = recoveredText;
+    }
     if (!q.k && q.k !== "hd" && q.k !== "sep") q.k = isSpeechText(q.t || "") || q.f ? "spk" : "nar";
+    q.kind = q.k;
   });
   if (!Number.isFinite(Number(st.paragraphsShownInNode)) || Number(st.paragraphsShownInNode) < 0) {
     st.paragraphsShownInNode = Array.isArray(st.queue) && st.queue.length && Array.isArray(st.chat) && st.chat.length ? 1 : 0;
@@ -5981,6 +5988,23 @@ const show = id => {
 /* --- состояние --- */
 const save = () => {
   try {
+    if (st && typeof st === "object") {
+      st.transcriptVersion = 2;
+      if (!Array.isArray(st.chat)) st.chat = [];
+      if (!Array.isArray(st.queue)) st.queue = [];
+      const normalizeRecord = record => {
+        if (!record || typeof record !== "object") return;
+        if (typeof record.t !== "string" || !record.t.trim() || !cleanSavedBody(record.t)) {
+          const recovered = savedMessageText(record);
+          if (recovered && cleanSavedBody(recovered)) record.t = recovered;
+        }
+        if (!record.k) record.k = record.kind || record.type || (isSpeechText(record.t || "") ? "spk" : "nar");
+        record.kind = record.k;
+        if (!record.nodeId && st.node) record.nodeId = st.node;
+      };
+      st.chat.forEach(normalizeRecord);
+      st.queue.forEach(normalizeRecord);
+    }
     localStorage.setItem(KEY, JSON.stringify(st));
     temporalMainSaveFailed = false;
   } catch (e) {
@@ -6050,12 +6074,16 @@ const fill = t => String(t == null ? "" : t).replace(/\{hero\}/g, st ? st.hero :
 // как пустая оболочка {k:"in", f:"Имя"}. Восстанавливаем их из STORY_DATA.
 function savedMessageText(record) {
   if (!record || typeof record !== "object") return "";
-  const fields = ["t", "text", "body", "content", "message", "value", "rawText", "fullText", "n"];
+  const fields = ["fullText", "rawText", "body", "content", "message", "value", "n", "text", "t"];
+  let placeholder = "";
   for (const key of fields) {
     const value = record[key];
-    if (typeof value === "string" && value.trim()) return value;
+    if (typeof value !== "string" || !value.trim()) continue;
+    // Старые рендеры могли перезаписать основной текст одной лишь меткой говорящего и тире.
+    if (/^\s*(?:\[[^\]]+\]\s*:\s*)?[—―–-]\s*$/u.test(value)) { placeholder = placeholder || value; continue; }
+    return value;
   }
-  return "";
+  return placeholder;
 }
 function cleanSavedBody(value) {
   let text = String(value == null ? "" : value);
@@ -6076,7 +6104,10 @@ function makeAuthoredTranscript(nodeIds) {
     node.messages.forEach((item, index) => {
       if (typeof item === "string") {
         if (item.trim() === "***") result.push({nodeId, index, k:"sep", t:"* * *", f:""});
-        else result.push({nodeId, index, k:isSpeechText(item) ? "spk" : "nar", t:fill(item), f:""});
+        else {
+          const text = fill(item), dialogue = isSpeechText(text);
+          result.push({nodeId, index, k:dialogue ? "spk" : "nar", t:text, f:dialogue ? inferAttributedSpeaker(text) : ""});
+        }
         return;
       }
       if (!item || typeof item !== "object") return;
@@ -6086,10 +6117,10 @@ function makeAuthoredTranscript(nodeIds) {
         return;
       }
       if (!raw.trim()) return;
-      const from = String(item.from || item.speaker || item.author || "").trim();
       let text = fill(raw);
-      const dialogue = isSpeechText(text) || !!from;
+      const dialogue = isSpeechText(text) || !!(item.from || item.speaker || item.author);
       if (dialogue && !isSpeechText(text)) text = "— " + text;
+      const from = String(item.from || item.speaker || item.author || (dialogue ? inferAttributedSpeaker(text) : "")).trim();
       result.push({nodeId, index, k:dialogue ? "spk" : "nar", t:text, f:from});
     });
   });
@@ -6097,6 +6128,18 @@ function makeAuthoredTranscript(nodeIds) {
 }
 function recoverLegacyTranscript(target) {
   if (!target) return {repaired:0, removed:0};
+  // Совместимость с ранними сборками, где полная лента называлась st.log.
+  if (Array.isArray(target.log) && target.log.length > (Array.isArray(target.chat) ? target.chat.length : 0)) {
+    target.chat = target.log.map(entry => {
+      if (typeof entry === "string") return {k:isSpeechText(entry) ? "spk" : "nar", t:entry};
+      if (!entry || typeof entry !== "object") return entry;
+      const text = savedMessageText(entry);
+      const kind = entry.k || entry.kind || entry.type || (isSpeechText(text) ? "spk" : "nar");
+      return {...entry, k:kind, t:(typeof entry.t === "string" && cleanSavedBody(entry.t)) ? entry.t : text};
+    });
+    delete target.log;
+  }
+  if (!Array.isArray(target.chat)) target.chat = [];
   const ids = Array.isArray(target.visitedNodes) ? target.visitedNodes.slice() : [];
   // В самых старых сохранениях visitedNodes ещё не было; decisionHistory хранит
   // последовательность пройденных узлов и позволяет восстановить тот же маршрут.
@@ -6114,12 +6157,18 @@ function recoverLegacyTranscript(target) {
     const body = cleanSavedBody(savedMessageText(saved));
     const speaker = savedSpeaker(saved);
     const kind = saved && saved.k === "sep" ? "sep" : (speaker || (saved && saved.k === "spk") ? "spk" : (saved && saved.k === "in" ? "any" : "nar"));
+    // Новые записи содержат точный индекс исходного абзаца: он надёжнее любого эвристического поиска.
+    if (saved && saved.nodeId && Number.isInteger(Number(saved.sourceIndex))) {
+      const exact = source.findIndex((candidate, i) => !used.has(i) && candidate.nodeId === saved.nodeId && candidate.index === Number(saved.sourceIndex));
+      if (exact >= 0) return exact;
+    }
+    const candidateSpeaker = candidate => candidate.f || inferAttributedSpeaker(candidate.t);
     // Сначала ищем после последней надёжно сопоставленной реплики — это сохраняет порядок сцен.
     for (let i = Math.max(0, fromIndex); i < source.length; i++) {
       const candidate = source[i];
       if (used.has(i)) continue;
       if (kind === "sep") { if (candidate.k === "sep") return i; continue; }
-      if (speaker && (candidate.k !== "spk" || !sameSpeaker(candidate.f, speaker))) continue;
+      if (speaker && (candidate.k !== "spk" || !sameSpeaker(candidateSpeaker(candidate), speaker))) continue;
       if (!speaker && kind !== "any" && candidate.k !== kind) continue;
       if (body) {
         const a = body.toLocaleLowerCase("ru"), b = cleanSavedBody(candidate.t).toLocaleLowerCase("ru");
@@ -6132,7 +6181,7 @@ function recoverLegacyTranscript(target) {
       for (let i = 0; i < source.length; i++) {
         const candidate = source[i];
         if (used.has(i)) continue;
-        if (kind === "sep" ? candidate.k === "sep" : (speaker ? candidate.k === "spk" && sameSpeaker(candidate.f, speaker) : (kind === "any" || candidate.k === kind))) return i;
+        if (kind === "sep" ? candidate.k === "sep" : (speaker ? candidate.k === "spk" && sameSpeaker(candidate.f || inferAttributedSpeaker(candidate.t), speaker) : (kind === "any" || candidate.k === kind))) return i;
       }
     }
     return -1;
@@ -6146,16 +6195,23 @@ function recoverLegacyTranscript(target) {
       const idx = findSource(record, cursor);
       if (body) {
         if (idx >= 0) { used.add(idx); cursor = Math.max(cursor, idx + 1); }
-        // Нормализуем альтернативные поля только если основное поле t отсутствует.
-        if (typeof record.t !== "string" || !record.t.trim()) record.t = existing;
+        // Если t — только пустая метка говорящего, используем полный текст из body/text/fullText.
+        if (!cleanSavedBody(record.t) && cleanSavedBody(existing)) {
+          record.t = existing;
+          if (record.k === "in") record.k = isSpeechText(existing) || savedSpeaker(record) ? "spk" : "nar";
+          record.kind = record.k;
+          repaired++;
+        }
         return;
       }
       if (idx >= 0) {
         const authored = source[idx];
         record.t = authored.t;
         record.k = authored.k;
+        record.kind = authored.k;
         if (authored.f) record.f = authored.f;
-        record.nodeId = record.nodeId || authored.nodeId;
+        record.nodeId = authored.nodeId;
+        record.sourceIndex = authored.index;
         used.add(idx); cursor = idx + 1; repaired++;
       } else if (record.k === "in" || record.k === "spk" || record.f || record.from || record.speaker) {
         // Не оставляем пустой пузырь с одним именем и тире.
@@ -6182,19 +6238,30 @@ function recoverLegacyTranscript(target) {
     if (!record || typeof record !== "object" || record.k === "hd" || record.k === "sep") return;
     const existing = savedMessageText(record);
     if (cleanSavedBody(existing)) {
-      if (typeof record.t !== "string" || !record.t.trim()) record.t = existing;
+      if (!cleanSavedBody(record.t)) {
+        record.t = existing;
+        if (!record.k) record.k = isSpeechText(existing) || savedSpeaker(record) ? "spk" : "nar";
+        record.kind = record.k;
+        repaired++;
+      }
       return;
     }
     const speaker = savedSpeaker(record);
     let idx = -1;
-    for (let i = queueCursor; i < currentSource.length; i++) {
+    if (record.nodeId === target.node && Number.isInteger(Number(record.sourceIndex))) {
+      idx = currentSource.findIndex((candidate, i) => i >= queueCursor && candidate.index === Number(record.sourceIndex));
+    }
+    for (let i = queueCursor; idx < 0 && i < currentSource.length; i++) {
       const candidate = currentSource[i];
-      if (speaker ? (candidate.k === "spk" && sameSpeaker(candidate.f, speaker)) : candidate.k !== "sep") { idx = i; break; }
+      if (speaker ? (candidate.k === "spk" && sameSpeaker(candidate.f || inferAttributedSpeaker(candidate.t), speaker)) : candidate.k !== "sep") { idx = i; break; }
     }
     if (idx >= 0) {
       record.t = currentSource[idx].t;
       record.k = currentSource[idx].k;
+      record.kind = currentSource[idx].k;
       if (currentSource[idx].f) record.f = currentSource[idx].f;
+      record.nodeId = currentSource[idx].nodeId;
+      record.sourceIndex = currentSource[idx].index;
       queueCursor = idx + 1; repaired++;
     } else {
       record.__dropEmptyLegacy = true;
@@ -6233,19 +6300,29 @@ function makeSpeakerName(name) {
   span.textContent = name;
   return span;
 }
-function appendAttributionText(parent, value) {
-  const text = String(value || "");
+function inferAttributedSpeaker(value) {
+  const text = String(value == null ? "" : value);
+  const explicit = text.match(SPEAKER_PREFIX);
+  if (explicit && explicit[1]) return explicit[1].trim();
+  // Определяем говорящего только для восстановления старых записей; исходную строку не меняем.
   const re = new RegExp(ATTRIBUTION_RE.source, ATTRIBUTION_RE.flags);
+  const match = re.exec(text);
+  return match ? String(match[2] || "").trim() : "";
+}
+function appendAttributionText(parent, value) {
+  // Только подсветка имён: весь исходный текст и все тире остаются на своих местах.
+  const text = String(value == null ? "" : value);
+  const namePattern = new RegExp("(^|[^\\p{L}\\p{N}])(" + ATTRIBUTION_NAMES.join("|") + ")(?![\\p{L}\\p{N}])", "giu");
   let cursor = 0, heroFound = false, match;
-  while ((match = re.exec(text)) !== null) {
+  while ((match = namePattern.exec(text)) !== null) {
+    const nameStart = match.index + String(match[1] || "").length;
     const name = match[2];
-    const nameStart = match.index + match[0].length - name.length;
     if (nameStart < cursor) continue;
     if (nameStart > cursor) parent.append(document.createTextNode(text.slice(cursor, nameStart)));
     parent.append(makeSpeakerName(name));
     if (isHeroSpeakerName(name)) heroFound = true;
     cursor = nameStart + name.length;
-    if (re.lastIndex <= match.index) re.lastIndex = match.index + 1;
+    if (namePattern.lastIndex <= match.index) namePattern.lastIndex = match.index + 1;
   }
   if (cursor < text.length) parent.append(document.createTextNode(text.slice(cursor)));
   return heroFound;
@@ -6265,30 +6342,42 @@ function draw(m, emptyText = false) {
   }
   else if (m.k === "sep") { d.textContent = "* * *"; d.setAttribute("role", "separator"); }
   else if (m.k === "spk") {
-    const raw = String(m.t || ""), prefix = raw.match(SPEAKER_PREFIX);
-    // Источник имени — явное поле from или уже встроенный префикс [Имя]:.
-    // Если from задан, имя показывается всегда: читателю не нужно угадывать говорящего
-    // по тексту или по title, который на телефоне практически незаметен.
-    const speaker = (prefix && prefix[1].trim()) || String(m.f || "").trim();
-    const heroSpeaker = isHeroSpeakerName(speaker);
+    const raw = String(m.t ?? m.fullText ?? m.text ?? ""), prefix = raw.match(SPEAKER_PREFIX);
+    // Источник имени — явное поле from или префикс [Имя]: в старой стенограмме.
+    const speaker = (prefix && prefix[1].trim()) || String(m.f || m.speaker || "").trim();
     if (speaker) {
       d.append(document.createTextNode("["), makeSpeakerName(speaker), document.createTextNode("]: "));
       d.dataset.speaker = speaker;
     }
-    const body = (prefix ? raw.slice(prefix[0].length) : raw).replace(SPEECH, "");
+    let body = prefix ? raw.slice(prefix[0].length) : raw;
+    // Убираем ровно один начальный маркер прямой речи: внутренние и вторые тире не трогаем.
+    const leadingDash = body.match(SPEECH);
+    if (leadingDash) body = body.slice(leadingDash[0].length);
     const dh = el("span", "—\u00a0"); dh.className = "dash"; d.append(dh);
-    if (!emptyText) appendAttributionText(d, body);
+    let mentionsHero = false;
+    if (!emptyText) mentionsHero = appendAttributionText(d, body);
     else { textNode = document.createTextNode(""); d.append(textNode); }
-    if (heroSpeaker) d.classList.add("hero-speech");
+    if (isHeroSpeakerName(speaker) || mentionsHero || /Аэ́рхис|Аэрхис/iu.test(body)) d.classList.add("hero-speech");
     if (speaker) d.title = speaker;
   }
   else { if (m.k === "in") d.append(el("b", m.f || st.hero)); textNode = document.createTextNode(emptyText ? "" : m.t); d.append(textNode); }
   const c = $("#chat"); c.append(d); c.scrollTop = c.scrollHeight;
   return { element: d, textNode };
 }
-function add(k, t, bad, x) { const m = { k, t, bad, nodeId: st && st.node || "" }; if (x) { m.f = x.f; m.no = x.no; m.pages = x.pages; } st.chat.push(m); if (st.chat.length > CHAT_MAX) st.chat.splice(0, st.chat.length - CHAT_MAX); draw(m); const cb = $("#chat"); while (cb.children.length > CHAT_MAX) cb.firstChild.remove(); save(); }
+function makeTranscriptRecord(k, t, bad, x) {
+  const text = String(t == null ? "" : t);
+  const m = { k, kind:k, t:text, bad:!!bad, nodeId:st && st.node || "" };
+  if (x) {
+    if (x.f) m.f = x.f;
+    if (x.no != null) m.no = x.no;
+    if (x.pages != null) m.pages = x.pages;
+    if (x.sourceIndex != null) m.sourceIndex = Number(x.sourceIndex);
+  }
+  return m;
+}
+function add(k, t, bad, x) { const m = makeTranscriptRecord(k, t, bad, x); st.chat.push(m); if (st.chat.length > CHAT_MAX) st.chat.splice(0, st.chat.length - CHAT_MAX); draw(m); const cb = $("#chat"); while (cb.children.length > CHAT_MAX) cb.firstChild.remove(); save(); }
 async function addTyped(k, t, bad, x, my) {
-  const m = { k, t, bad, nodeId: st && st.node || "" }; if (x) { m.f = x.f; m.no = x.no; m.pages = x.pages; }
+  const m = makeTranscriptRecord(k, t, bad, x);
   // Учитываем абзац один раз в отложенном буфере. Он попадёт в общий счётчик
   // при нажатии «Читать дальше...» или выборе сюжетного действия.
   if (x && x.k !== "hd" && x.k !== "sep") {
@@ -6715,7 +6804,7 @@ function archiveAbandonedTimeline(index, oldHistory) {
       timelineId: Number(d.timelineId) || Number(st.timelineId) || 1,
       kind: d.kind || "story", relation: i < index ? "shared" : "abandoned"
     })),
-    transcript: (st.chat || []).slice(-CHAT_MAX).map(m => ({t:m.t, k:m.k, f:m.f, n:m.n, no:m.no, pages:m.pages})),
+    transcript: (st.chat || []).slice(-ROUTE_TRANSCRIPT_MAX).map(m => ({t:m.t, k:m.k, f:m.f, n:m.n, no:m.no, pages:m.pages})),
     storyMoments: (st.storyMoments || []).map(m => ({...m})),
     endpoint: {
       chapter: Number(st.currentChapter || st.chap) || 1,
@@ -7083,7 +7172,7 @@ function enter(id) {
   recordFlags(o.addFlags);
   (o.removeFlags || []).forEach(f => st.flags = st.flags.filter(x => x !== f));
   st.paragraphsShownInNode = 0;
-  st.queue = (n.messages || []).filter(m => {
+  st.queue = (n.messages || []).map((message, sourceIndex) => ({message, sourceIndex})).filter(({message:m}) => {
     if (typeof m === "string") return true;
     if (m.skill && !hasSkill(m.skill)) return false;
     if (m.item && !st.inv.includes(m.item)) return false;
@@ -7094,14 +7183,14 @@ function enter(id) {
     if (Array.isArray(m.choiceIds) && !m.choiceIds.some(hasDecision)) return false;
     if (!storyConditionsMet(m)) return false;
     return true;
-  }).map(m => {
+  }).map(({message:m, sourceIndex}) => {
     const tx = typeof m === "string" ? m : (m.n || m.t || "");
-    if ((typeof m !== "string" && m.sep) || tx.trim() === "***") return { t: "* * *", k: "sep" };
+    if ((typeof m !== "string" && m.sep) || tx.trim() === "***") return { t:"* * *", k:"sep", kind:"sep", nodeId:id, sourceIndex };
     let ft = fill(tx);
     const isDialogue = isSpeechText(ft) || (typeof m !== "string" && !!m.from);
     if (isDialogue && !isSpeechText(ft)) ft = "— " + ft;
-    // Обычный текст всегда книжный нарратив; только прямая речь получает отдельный абзац с тире.
-    return { t: ft, k: isDialogue ? "spk" : "nar", n: !isDialogue && typeof m !== "string" && !!m.n, f: typeof m === "string" ? undefined : m.from };
+    // Сохраняем исходный абзац целиком и стабильный индекс в STORY_DATA.
+    return { t:ft, k:isDialogue ? "spk" : "nar", kind:isDialogue ? "spk" : "nar", n:!isDialogue && typeof m !== "string" && !!m.n, f:typeof m === "string" ? undefined : m.from, nodeId:id, sourceIndex };
   });
   if (n.chapter) {
     const chapterHeaderNo = Number(n.chapter.no) || st.currentChapter;
