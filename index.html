@@ -436,6 +436,34 @@ body {
 .chronology-map .journal-note{margin:8px 0;padding:10px;border-left:2px solid rgba(150,190,215,.35)}
 .chronology-map button{width:100%;margin-top:8px;white-space:normal}
 #spChronicle{letter-spacing:.12em;box-shadow:0 0 18px #9a83ff22}#spChronicle[hidden]{display:none!important}
+/* --- Исследование окружения: отдельный мягко подсвеченный блок над выборами --- */
+#game #chs .inspect-section {
+  display:flex; flex-direction:column; gap:7px; width:100%;
+  padding:10px; margin:0 0 2px; border:1px solid rgba(126,181,215,.34);
+  border-left:3px solid #82c5d7; border-radius:9px;
+  background:linear-gradient(115deg,rgba(35,69,83,.42),rgba(22,39,55,.56) 62%,rgba(22,28,48,.58));
+  box-shadow:inset 0 1px 0 #ffffff0b,0 2px 12px #5bbbd31a;
+  max-height:26vh; overflow-y:auto; overscroll-behavior:contain;
+  scrollbar-width:thin; scrollbar-color:#628d9b55 transparent;
+}
+#game #chs .inspect-heading {
+  color:#b9e7ef; font:700 11px/1.35 Oswald,sans-serif;
+  letter-spacing:.13em; padding:0 2px 2px;
+  text-shadow:0 0 10px #78d8ed35;
+}
+#game #chs button.inspect-btn {
+  width:100%; min-height:42px; padding:9px 11px;
+  border:1px solid #456879; border-left:2px solid #79b9c8;
+  border-radius:7px; background:linear-gradient(105deg,#1a303d,#142633 68%,#111f2d);
+  color:#d8edf2; text-align:left; font:500 12px/1.45 Lora,Georgia,serif;
+  transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,opacity .18s ease;
+}
+#game #chs button.inspect-btn::before { content:"⌕"; display:inline-block; margin-right:8px; color:#9adbe7; font:700 16px/1 ui-monospace,monospace; }
+#game #chs button.inspect-btn:active:not(:disabled) { background:linear-gradient(105deg,#244a59,#1a3948); border-color:#9adbe7; box-shadow:0 0 13px #6bc6dc35; }
+#game #chs button.inspect-btn:disabled { opacity:.72; border-color:#354b56; border-left-color:#66858d; background:linear-gradient(105deg,#19262d,#141e27); color:#9fb2b8; }
+#game #chs button.inspect-btn small { display:block; margin:4px 0 0 24px; color:#9fbac1; font:10px/1.4 ui-monospace,Menlo,monospace; }
+#game #chs button.inspect-btn.is-inspected { border-left-color:#8bc6a3; color:#b9d9c4; background:linear-gradient(105deg,#1b302a,#142520); }
+#game #chs button.inspect-btn.is-inspected::before { content:"✓"; color:#9ad8af; }
 .response-deadline{width:100%;padding:8px 10px 9px;margin:0 0 2px;border:1px solid rgba(255,107,139,.48);border-left:3px solid var(--rd);border-radius:8px;background:linear-gradient(100deg,#281321,#17101c);display:flex;flex-direction:column;gap:6px}
 .response-deadline .deadline-label{font-size:12px;font-weight:700;color:#ffd6df;letter-spacing:.02em}
 .response-deadline .deadline-track{height:5px;border-radius:8px;background:#472433;overflow:hidden}
@@ -483,6 +511,7 @@ body {
         // объект показывается только если у героя есть навык / предмет / флаг. {hero} = позывной героя
      onEnter: { hp, o2, energy, ammo (числа ±), addItems:[], removeItems:[], addFlags:[], removeFlags:[] },
      waitSeconds, waitText,           // таймер после реплик
+     inspects: [{id,label,reqSkill,text,addClue:{id,title,desc}}], // осмотры до сюжетных выборов
      choices: [{ text, goto, reqSkill, reqItem, reqAmmo, reqFlag, forbidFlag, hpCost, o2Cost, energyCost/enCost, hpGain, o2Gain, enGain }]
    }
    Нет choices — концовка. reqAmmo тратит патроны. Условия по флагам скрывают кнопку, прочие блокируют её.
@@ -1851,6 +1880,8 @@ function summarizeCurrentRun() {
     chapterEndChars: st && st.chapterEndChars ? JSON.parse(JSON.stringify(st.chapterEndChars)) : {},
     decisions: (st && Array.isArray(st.decisionHistory) ? st.decisionHistory : []).map((d, i) => ({...d, ...summarizeDecision(d), snapshot:d.snapshot ? JSON.parse(JSON.stringify(d.snapshot)) : null, sequence:Number(d.sequence)||i+1, kind:d.kind||"story", eventId:d.eventId||null})),
     flags: (st && Array.isArray(st.flags) ? st.flags : []).slice(),
+    inspectedInspects: (st && Array.isArray(st.inspectedInspects) ? st.inspectedInspects : []).slice(),
+    clues: (st && Array.isArray(st.clues) ? st.clues : []).map(clue => ({...clue})),
     storyVars: st && st.storyVars ? JSON.parse(JSON.stringify(st.storyVars)) : {},
     relationships: st && st.relationships ? JSON.parse(JSON.stringify(st.relationships)) : {},
     resources: st ? {hp:st.hp,o2:st.o2,en:st.en,ammo:st.ammo} : {},
@@ -1939,6 +1970,7 @@ STORY_DATA.meta.achievements["T2_ОБМАНУЛ"] = "Вы передали T2 л
 STORY_DATA.meta.achievements["T2_ВЫСЛУШАЛ"] = "Вы выслушали T2, не вмешиваясь.";
 
 let skip = false, st = null, run = 0, cfg = { mode: "real", sound: true }, sel = null, picked = new Set();
+let inspectBusy = false;
 
 let ac = null;
 function tone(f, d, type = "sine", v = .05, f2) {
@@ -1984,7 +2016,7 @@ $("#go").onclick = () => {
   } else {
     metaProgress.activeTimelineId = 1;
   }
-  st = { timelineId: startingTimelineId, activeTimelineId: startingTimelineId, timelines: previousArchive, hero: h.name, arch: sel === "custom" ? "Свой персонаж" : (h.path || h.name), stats: { steps: 0, choices: 0, skills: 0, skillList: [], dmg: 0, ammo: 0, o2: 0, en: 0 }, skills: [...h.skills], mode: cfg.mode, sound: cfg.sound, hp: 20, o2: 100, en: 100, ammo: h.ammo, inv: [...h.items], itemBuffs: [], itemUseLog: {}, equipment: {}, flags: [], journalSeen: [], dossiers: ["aerkhis", "liorsaen"], chat: [], queue: [], pend: [], node: null, currentChapter: 1, shownChapterHeader: 0, currentPage: 1, charsRead: 0, pendingCharsRead: 0, chapterStartChars: {"1":0}, chapterEndChars: {}, pageSchemeVersion: 4, temporalHistoryVersion: 3, chap: 1, page: 1, waitUntil: 0, waitMode: null, waitDone: false, waitWasSkipped: false, activeResponseDeadline: null, incomingCallsDelivered: [], notificationsEnabled: false, decisionHistory: [], decisionSequence: 0, storyMoments: [], pendingOutcome: null, realtimeSchedule: [], realtimeInbox: [], realtimeDelivered: [], storyVars: {}, relationships: {}, characterFates: {}, dead: false };
+  st = { timelineId: startingTimelineId, activeTimelineId: startingTimelineId, timelines: previousArchive, hero: h.name, arch: sel === "custom" ? "Свой персонаж" : (h.path || h.name), stats: { steps: 0, choices: 0, skills: 0, skillList: [], dmg: 0, ammo: 0, o2: 0, en: 0 }, skills: [...h.skills], mode: cfg.mode, sound: cfg.sound, hp: 20, o2: 100, en: 100, ammo: h.ammo, inv: [...h.items], itemBuffs: [], itemUseLog: {}, equipment: {}, flags: [], journalSeen: [], inspectedInspects: [], clues: [], dossiers: ["aerkhis", "liorsaen"], chat: [], queue: [], pend: [], node: null, currentChapter: 1, shownChapterHeader: 0, currentPage: 1, charsRead: 0, pendingCharsRead: 0, chapterStartChars: {"1":0}, chapterEndChars: {}, pageSchemeVersion: 4, temporalHistoryVersion: 3, chap: 1, page: 1, waitUntil: 0, waitMode: null, waitDone: false, waitWasSkipped: false, activeResponseDeadline: null, incomingCallsDelivered: [], notificationsEnabled: false, decisionHistory: [], decisionSequence: 0, storyMoments: [], pendingOutcome: null, realtimeSchedule: [], realtimeInbox: [], realtimeDelivered: [], storyVars: {}, relationships: {}, characterFates: {}, dead: false };
   applyT2Carryover(st);
   $("#chat").innerHTML = ""; show("game"); status(); enter(STORY_DATA.meta.start);
   // Если история уже завершалась, новый старт — это новая временная линия.
@@ -2569,6 +2601,10 @@ function makeTranscriptRecord(k, t, bad, x) {
     if (x.no != null) m.no = x.no;
     if (x.pages != null) m.pages = x.pages;
     if (x.sourceIndex != null) m.sourceIndex = Number(x.sourceIndex);
+    if (x.nodeId) m.nodeId = String(x.nodeId);
+    if (x.inspectId) m.inspectId = String(x.inspectId);
+    if (x.clueId) m.clueId = String(x.clueId);
+    if (x.inspectTitle) m.inspectTitle = String(x.inspectTitle);
   }
   return m;
 }
@@ -2807,10 +2843,12 @@ function updateJournalBadge() {
   const badge = $("#jn"), btn = $("#bLog");
   if (!badge || !btn || !st) return;
   const seen = new Set(Array.isArray(st.journalSeen) ? st.journalSeen : []);
-  const unreadFlags = st.flags.filter(f => STORY_DATA.meta.flagNames[f] && !seen.has(f)).length;
+  const flags = Array.isArray(st.flags) ? st.flags : [];
+  const unreadFlags = flags.filter(f => STORY_DATA.meta.flagNames[f] && !seen.has(f)).length;
+  const unreadClues = Array.isArray(st.clues) ? st.clues.filter(clue => clue && !clue.read).length : 0;
   const unreadMessages = Array.isArray(st.realtimeInbox) ? st.realtimeInbox.filter(x => !x.read && !x.answered).length : 0;
   const unreadT2 = (typeof metaProgress !== "undefined" && metaProgress.t2) ? Math.max(0, Number(metaProgress.t2.unreadReplies) || 0) : 0;
-  const unread = unreadFlags + unreadMessages + unreadT2;
+  const unread = unreadFlags + unreadClues + unreadMessages + unreadT2;
   badge.textContent = unread > 9 ? "9+" : String(unread);
   badge.hidden = unread === 0;
   btn.setAttribute("aria-label", unread ? "Открыть журнал, новых записей: " + unread : "Открыть журнал");
@@ -2829,6 +2867,11 @@ function ensureStoryState(target = st) {
   if (!target.storyVars || typeof target.storyVars !== "object") target.storyVars = {};
   if (!target.relationships || typeof target.relationships !== "object") target.relationships = {};
   if (!target.characterFates || typeof target.characterFates !== "object" || Array.isArray(target.characterFates)) target.characterFates = {};
+  // Осмотры и найденные улики являются частью состояния конкретной временной линии.
+  if (!Array.isArray(target.inspectedInspects)) target.inspectedInspects = [];
+  if (!Array.isArray(target.clues)) target.clues = [];
+  target.inspectedInspects = [...new Set(target.inspectedInspects.map(String).filter(Boolean))];
+  target.clues = target.clues.filter(clue => clue && typeof clue === "object" && String(clue.id || "").trim());
   Object.keys(STORY_RELATION_LABELS).forEach(key => {
     const value = Number(target.relationships[key]);
     target.relationships[key] = Number.isFinite(value) ? Math.max(-100, Math.min(100, value)) : 0;
@@ -3005,6 +3048,8 @@ function archiveAbandonedTimeline(index, oldHistory) {
       node: st.node || "",
       hp: st.hp, o2: st.o2, en: st.en, ammo: st.ammo,
       flags: (st.flags || []).slice(), inventory: (st.inv || []).slice(),
+      inspectedInspects: (st.inspectedInspects || []).slice(),
+      clues: (st.clues || []).map(clue => ({...clue})),
       unreadMessages: (st.realtimeInbox || []).filter(x => !x.read && !x.answered).length,
       relationships: JSON.parse(JSON.stringify(st.relationships || {})),
       storyVars: JSON.parse(JSON.stringify(st.storyVars || {})),
@@ -3706,10 +3751,108 @@ function attachResponseDeadline(node, box) {
   tick();
   if (st && st.activeResponseDeadline && st.activeResponseDeadline.nodeId === record.nodeId) responseDeadlineTimer = setInterval(tick, 200);
 }
+function inspectRecordKey(nodeId, inspect) {
+  const id = String(inspect && inspect.id || "").trim();
+  return String(nodeId || "") + "::" + (id || "inspect-" + String(inspect && inspect._index || 0));
+}
+function inspectIsDone(nodeId, inspect) {
+  ensureStoryState();
+  return st.inspectedInspects.includes(inspectRecordKey(nodeId, inspect));
+}
+function inspectBlockReason(inspect) {
+  if (inspect && inspect.reqSkill && !hasSkill(inspect.reqSkill)) return "Нужен навык «" + inspect.reqSkill + "»";
+  return "";
+}
+async function performInspect(inspect, nodeId, index) {
+  if (!st || st.node !== nodeId || !inspect || inspectBusy) return false;
+  const reason = inspectBlockReason(inspect);
+  if (reason) return false;
+  ensureStoryState();
+  const key = inspectRecordKey(nodeId, {...inspect, _index:index});
+  if (st.inspectedInspects.includes(key)) return false;
+
+  inspectBusy = true;
+  // Пока находка проявляется в книжной ленте, не даём одновременно выбрать сюжетный маршрут.
+  const choiceBox = $("#chs");
+  if (choiceBox) choiceBox.querySelectorAll("button").forEach(button => { button.disabled = true; });
+  try {
+    st.inspectedInspects.push(key);
+    const clueInput = inspect.addClue && typeof inspect.addClue === "object" ? inspect.addClue : null;
+    let clueId = "";
+    if (clueInput && String(clueInput.id || "").trim()) {
+      clueId = String(clueInput.id).trim();
+      const existing = st.clues.find(clue => String(clue.id) === clueId);
+      if (!existing) {
+        st.clues.push({
+          id: clueId,
+          title: String(clueInput.title || "Новая улика"),
+          desc: String(clueInput.desc || ""),
+          nodeId,
+          inspectId: String(inspect.id || ""),
+          discoveredAt: Date.now(),
+          read: false
+        });
+      }
+    }
+    st.stats = st.stats || {};
+    st.stats.inspections = Math.max(0, Number(st.stats.inspections) || 0) + 1;
+    if (inspect.reqSkill) {
+      st.stats.skills = Math.max(0, Number(st.stats.skills) || 0) + 1;
+      if (!Array.isArray(st.stats.skillList)) st.stats.skillList = [];
+      if (!st.stats.skillList.includes(inspect.reqSkill)) st.stats.skillList.push(inspect.reqSkill);
+    }
+    sfx.signal();
+    save();
+    updateJournalBadge();
+
+    const findingText = fill(String(inspect.text || "Вы внимательно осмотрели объект, но ничего нового не обнаружили."));
+    await addTyped("nar", findingText, false, {
+      nodeId,
+      inspectId: String(inspect.id || ""),
+      clueId,
+      inspectTitle: String(inspect.label || "Осмотр окружения")
+    }, run);
+    return true;
+  } finally {
+    inspectBusy = false;
+    if (st && st.node === nodeId) choices(STORY_DATA.nodes[nodeId]);
+  }
+}
+
+function renderInspects(node, box) {
+  const list = Array.isArray(node && node.inspects) ? node.inspects : [];
+  if (!list.length) return 0;
+  const section = el("section", ""); section.className = "inspect-section";
+  const heading = el("div", "🔍 ИССЛЕДОВАТЬ ОКРУЖЕНИЕ"); heading.className = "inspect-heading"; section.append(heading);
+  list.forEach((inspect, index) => {
+    if (!inspect || typeof inspect !== "object") return;
+    const done = inspectIsDone(st.node, {...inspect, _index:index});
+    const reason = done ? "" : inspectBlockReason(inspect);
+    const button = document.createElement("button"); button.type = "button";
+    button.className = "inspect-btn" + (done ? " is-inspected" : "");
+    button.disabled = done || !!reason;
+    const label = String(inspect.label || "Осмотреть объект");
+    button.append(document.createTextNode(label + (done ? " [Изучено]" : "")));
+    const detail = done ? "Находка добавлена в книгу" : (reason || (inspect.reqSkill ? "Проверка навыка: " + inspect.reqSkill : "Доступно для осмотра"));
+    button.append(el("small", detail));
+    if (!done && !reason) button.onclick = () => performInspect(inspect, st.node, index);
+    if (reason) button.title = reason;
+    section.append(button);
+  });
+  box.append(section);
+  return section.querySelectorAll("button").length;
+}
 function choices(n) {
-  const box = $("#chs"); stopResponseDeadlineTicker(); box.innerHTML = ""; if (!n.choices || !n.choices.length) return endBtn();
+  const box = $("#chs"); stopResponseDeadlineTicker(); box.innerHTML = "";
   if (checkResponseDeadline()) return;
   attachResponseDeadline(n, box);
+  renderInspects(n, box);
+  if (!n.choices || !n.choices.length) {
+    endBtn(true);
+    fitChoices();
+    scrollChatToBottom();
+    return;
+  }
   n.choices.forEach(c => {
     const requiredFlags = c.reqFlags || (c.reqFlag ? [c.reqFlag] : []);
     const forbiddenFlags = c.forbidFlags || (c.forbidFlag ? [c.forbidFlag] : []);
@@ -3747,10 +3890,11 @@ function choices(n) {
     else b.onclick = () => pick(c);
     box.append(b);
   });
-  if (!box.children.length) box.append(el("p", "Для этой ситуации пока нет доступных решений. Проверьте записи Журнала и инвентарь."));
+  if (!box.querySelector("button.ch") && !box.querySelector(".inspect-section")) box.append(el("p", "Для этой ситуации пока нет доступных решений. Проверьте записи Журнала и инвентарь."));
   fitChoices();
   scrollChatToBottom();
 }
+
 function scrollChatToBottom() {
   const c = $("#chat");
   requestAnimationFrame(() => { c.scrollTop = c.scrollHeight; });
@@ -3763,8 +3907,8 @@ function fitChoices() {
   h.textContent = "ВАШ ВЫБОР / ДЕЙСТВИЕ:";
   h.hidden = !hasCards;
 }
-function endBtn() {
-  const box = $("#chs"); box.innerHTML = "";
+function endBtn(preserveContent = false) {
+  const box = $("#chs"); if (!preserveContent) box.innerHTML = "";
   const a = el("button", "📜 Итоги пути"); a.onclick = () => showFinal(st.dead);
   const b = el("button", "↻ Начать новый путь"); b.onclick = restart; box.append(a, b); fitChoices(); scrollChatToBottom();
 }
@@ -4382,6 +4526,7 @@ function openChronologyFromSplash() {
 
 function openJournal() {
   if (!st) return;
+  ensureStoryState();
   if (!Array.isArray(st.journalSeen)) st.journalSeen = [];
   migrateDossiersForLegacySave();
   const notes = st.flags.filter(f => STORY_DATA.meta.flagNames[f]);
@@ -4406,6 +4551,20 @@ function openJournal() {
       p.className = unseen.has(f) ? "journal-note journal-note-new" : "journal-note";
       m.append(p);
     });
+    m.append(el("h3", "Улики и находки"));
+    if (!st.clues.length) {
+      m.append(el("p", "Улик пока нет. Ищите доступные точки осмотра в секции «Исследовать окружение» во время сюжетных сцен."));
+    } else {
+      st.clues.slice().sort((a,b) => Number(a.discoveredAt || 0) - Number(b.discoveredAt || 0)).reverse().forEach(clue => {
+        const card = el("section", ""); card.className = "journal-note" + (clue.read ? "" : " journal-note-new");
+        const chapter = Number(String(clue.nodeId || "").match(/^c(\d+)_/)?.[1] || 0);
+        card.append(el("b", "🔎 " + (clue.title || "Найденная улика")));
+        if (chapter) card.append(el("small", "Глава " + chapter + " · " + (clue.nodeId || "")));
+        card.append(el("p", clue.desc || "Описание находки не задано."));
+        m.append(card);
+        clue.read = true;
+      });
+    }
     ensureMetaProgress();
     const temporal = el("section", ""); temporal.className = "temporal-panel" + (isChronicleUnlocked() ? "" : " temporal-locked");
     temporal.append(el("strong", isChronicleUnlocked() ? "ХРОНОЛОГИЯ · РАЗБЛОКИРОВАНА" : "ХРОНОЛОГИЯ · ЗАБЛОКИРОВАНА"));
@@ -4584,6 +4743,7 @@ function openJournal() {
     }
   });
   st.journalSeen = [...new Set([...st.journalSeen, ...notes])];
+  if (Array.isArray(st.clues)) st.clues.forEach(clue => { if (clue) clue.read = true; });
   save(); updateJournalBadge();
 }
 $("#bLog").addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); openJournal(); });
