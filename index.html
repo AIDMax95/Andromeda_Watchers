@@ -473,6 +473,28 @@ body {
 .t2-observer strong{color:#e0d4ff;font-size:11px;letter-spacing:.08em}
 .t2-observer p{margin:0;color:#ddd4f3;font:13px/1.55 Lora,Georgia,serif}
 .t2-observer small{color:#9d94ba;font-size:10px;line-height:1.5}
+
+/* --- Журнал улик и самостоятельный канал связи --- */
+.journal-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;position:sticky;top:-14px;z-index:5;padding:5px 0;background:var(--pn)}
+.journal-tab{font-size:12px;text-align:center;padding:9px 7px;border-color:#2b3859;background:#090e1a;color:#aebbdc}
+.journal-tab.active{border-color:var(--ac);background:#17233a;color:#e5edff;box-shadow:inset 0 -2px var(--ac)}
+.journal-pane[hidden]{display:none!important}
+.clue-entry{display:flex;flex-direction:column;gap:5px;padding:10px;border:1px solid #36415f;border-left:3px solid var(--am);border-radius:8px;background:linear-gradient(145deg,#17152a,#0a0e1a)}
+.clue-entry b{font-size:13px;color:#e7dcff}.clue-entry p{margin:0;color:#c8c4dd;font:12px/1.55 Lora,Georgia,serif}
+.call-roster,.call-topics,.call-transcript{display:flex;flex-direction:column;gap:8px}
+.call-contact{width:100%;display:flex;flex-direction:column;gap:4px;padding:11px 12px;background:linear-gradient(145deg,#111a2c,#090e1a);border-color:#2b3a58}
+.call-contact strong{color:#e0eaff;font-size:13px}.call-contact small{color:#9aaaca;font-size:11px}
+.call-trust{color:#9fc1ff!important}
+.call-topic{width:100%;display:flex;flex-direction:column;gap:4px;padding:10px 11px;text-align:left;background:#0b1120}
+.call-topic strong{font-size:12px;color:#dbe7ff}.call-topic small{color:#92a2c7;font-size:10px}
+.call-topic:disabled{opacity:.68}
+.call-transcript{padding:9px;border:1px solid #263452;border-radius:9px;background:#080d18}
+.call-line{padding:8px 10px;border-radius:8px;background:#111b2d;border-left:2px solid #c9a8ff;color:#d6e0f7;font:13px/1.55 Lora,Georgia,serif;white-space:pre-wrap}
+.call-line.player{margin-left:15px;background:#17243a;border-left-color:#8fb8ff}
+.call-line.contact{margin-right:15px}
+.call-result{padding:8px 10px;border:1px solid #31415f;border-radius:7px;color:#b9c9e8;font-size:11px;line-height:1.5}
+#bCall{white-space:nowrap;font-size:11px;padding:5px 7px;border-color:#35476a;color:#bcd3ff}
+@media(max-width:390px){#bCall{font-size:10px;padding:5px 5px}.tl{gap:4px}.tl b{min-width:57px}}
 </style></head><body>
 
 <div id="loader" class="scr on"><div class="ld-t" id="ldT"></div><div class="ld-bar"><i id="ldbar"></i></div><div id="ldlog"></div><div class="cred" id="ldA"></div></div>
@@ -491,7 +513,7 @@ body {
 
 <div id="game" class="scr">
  <div id="top">
-  <div class="tl"><b id="hpt"></b><div class="bar"><i id="hpb" style="background:var(--ac)"></i></div><button id="bMode"></button><button id="bInv">🎒 <span id="ic"></span></button><button id="bLog" type="button" aria-label="Открыть журнал" title="Открыть журнал">📓<span id="jn" class="journal-badge" hidden></span></button></div>
+  <div class="tl"><b id="hpt"></b><div class="bar"><i id="hpb" style="background:var(--ac)"></i></div><button id="bMode"></button><button id="bInv">🎒 <span id="ic"></span></button><button id="bLog" type="button" aria-label="Открыть журнал" title="Открыть журнал">📓<span id="jn" class="journal-badge" hidden></span></button><button id="bCall" type="button" aria-label="Открыть канал связи" title="Канал связи с персонажами">📡 Связь</button></div>
   <div class="tl"><b id="o2t"></b><div class="bar"><i id="o2b" style="background:var(--bl)"></i></div><b id="ent"></b><div class="bar"><i id="enb" style="background:var(--am)"></i></div><b id="am" style="min-width:56px"></b></div>
   <div class="pg" id="pg"></div>
  </div>
@@ -670,6 +692,7 @@ function loadChapter(chapterNum) {
         }
         if (typeof window.applyChoiceOutcomesToLoadedNodes === "function") window.applyChoiceOutcomesToLoadedNodes();
       }
+      bindChapterCallTopics(key);
       loadedStoryChapters.add(key);
       resolve(key);
     };
@@ -1882,6 +1905,9 @@ function summarizeCurrentRun() {
     flags: (st && Array.isArray(st.flags) ? st.flags : []).slice(),
     inspectedInspects: (st && Array.isArray(st.inspectedInspects) ? st.inspectedInspects : []).slice(),
     clues: (st && Array.isArray(st.clues) ? st.clues : []).map(clue => ({...clue})),
+    discussedCalls: st && Array.isArray(st.discussedCalls) ? st.discussedCalls.slice() : [],
+    callHistory: st && Array.isArray(st.callHistory) ? st.callHistory.map(entry => ({...entry, messages:Array.isArray(entry.messages)?entry.messages.slice():[]})) : [],
+    surveillanceNotes: st && Array.isArray(st.surveillanceNotes) ? st.surveillanceNotes.map(entry => ({...entry})) : [],
     storyVars: st && st.storyVars ? JSON.parse(JSON.stringify(st.storyVars)) : {},
     relationships: st && st.relationships ? JSON.parse(JSON.stringify(st.relationships)) : {},
     resources: st ? {hp:st.hp,o2:st.o2,en:st.en,ammo:st.ammo} : {},
@@ -2016,7 +2042,7 @@ $("#go").onclick = () => {
   } else {
     metaProgress.activeTimelineId = 1;
   }
-  st = { timelineId: startingTimelineId, activeTimelineId: startingTimelineId, timelines: previousArchive, hero: h.name, arch: sel === "custom" ? "Свой персонаж" : (h.path || h.name), stats: { steps: 0, choices: 0, skills: 0, skillList: [], dmg: 0, ammo: 0, o2: 0, en: 0 }, skills: [...h.skills], mode: cfg.mode, sound: cfg.sound, hp: 20, o2: 100, en: 100, ammo: h.ammo, inv: [...h.items], itemBuffs: [], itemUseLog: {}, equipment: {}, flags: [], journalSeen: [], inspectedInspects: [], clues: [], dossiers: ["aerkhis", "liorsaen"], chat: [], queue: [], pend: [], node: null, currentChapter: 1, shownChapterHeader: 0, currentPage: 1, charsRead: 0, pendingCharsRead: 0, chapterStartChars: {"1":0}, chapterEndChars: {}, pageSchemeVersion: 4, temporalHistoryVersion: 3, chap: 1, page: 1, waitUntil: 0, waitMode: null, waitDone: false, waitWasSkipped: false, activeResponseDeadline: null, incomingCallsDelivered: [], notificationsEnabled: false, decisionHistory: [], decisionSequence: 0, storyMoments: [], pendingOutcome: null, realtimeSchedule: [], realtimeInbox: [], realtimeDelivered: [], storyVars: {}, relationships: {}, characterFates: {}, dead: false };
+  st = { timelineId: startingTimelineId, activeTimelineId: startingTimelineId, timelines: previousArchive, hero: h.name, arch: sel === "custom" ? "Свой персонаж" : (h.path || h.name), stats: { steps: 0, choices: 0, skills: 0, skillList: [], dmg: 0, ammo: 0, o2: 0, en: 0 }, skills: [...h.skills], mode: cfg.mode, sound: cfg.sound, hp: 20, o2: 100, en: 100, ammo: h.ammo, inv: [...h.items], itemBuffs: [], itemUseLog: {}, equipment: {}, flags: [], journalSeen: [], inspectedInspects: [], clues: [], discussedCalls: [], callHistory: [], surveillanceNotes: [], dossiers: ["aerkhis", "liorsaen"], chat: [], queue: [], pend: [], node: null, currentChapter: 1, shownChapterHeader: 0, currentPage: 1, charsRead: 0, pendingCharsRead: 0, chapterStartChars: {"1":0}, chapterEndChars: {}, pageSchemeVersion: 4, temporalHistoryVersion: 3, chap: 1, page: 1, waitUntil: 0, waitMode: null, waitDone: false, waitWasSkipped: false, activeResponseDeadline: null, incomingCallsDelivered: [], notificationsEnabled: false, decisionHistory: [], decisionSequence: 0, storyMoments: [], pendingOutcome: null, realtimeSchedule: [], realtimeInbox: [], realtimeDelivered: [], storyVars: {}, relationships: {}, characterFates: {}, dead: false };
   applyT2Carryover(st);
   $("#chat").innerHTML = ""; show("game"); status(); enter(STORY_DATA.meta.start);
   // Если история уже завершалась, новый старт — это новая временная линия.
@@ -2138,6 +2164,7 @@ $("#cont").onclick = async () => {
       });
     }
   }
+  ensureStoryState(st);
   migrateDossiersForLegacySave();
   ensureRealtimeState();
   applyT2Carryover(st);
@@ -2860,7 +2887,7 @@ const STORY_RELATION_LABELS = {
   theo:"Тео", marta:"Марта", sven:"Свен Линд", olaf:"Олаф", liorsaen:"Лиор’Саэн",
   henrik:"Хенрик", ragnar:"Рагнар Торвальдсен", astrid:"Астрид Сольберг",
   sigurd:"Сигурд", knut:"Кнут", eric:"Эрик Соренсен", hannah:"Ханна Линдквист", lucas:"Лукас", henriksson:"Инспектор Хенрикссон", morten:"Мортен Бекк", kraus:"Профессор Вильгельм Краус", varg:"Командор Варг",
-  marcus:"Маркус Келлер", elena:"Елена Морозова", arthur:"Доктор Артур Вейланд", timur:"Тимур Садыков", aisulu:"Айсулу"
+  marcus:"Маркус Келлер", elena:"Елена Морозова", arthur:"Доктор Артур Вейланд", timur:"Тимур Садыков", aisulu:"Айсулу", selen:"Командор-Навигатор Селен"
 };
 function ensureStoryState(target = st) {
   if (!target) return;
@@ -2870,6 +2897,19 @@ function ensureStoryState(target = st) {
   // Осмотры и найденные улики являются частью состояния конкретной временной линии.
   if (!Array.isArray(target.inspectedInspects)) target.inspectedInspects = [];
   if (!Array.isArray(target.clues)) target.clues = [];
+  if (!Array.isArray(target.discussedCalls)) target.discussedCalls = [];
+  if (!Array.isArray(target.callHistory)) target.callHistory = [];
+  if (!Array.isArray(target.surveillanceNotes)) target.surveillanceNotes = [];
+  target.discussedCalls = [...new Set(target.discussedCalls.map(String).filter(Boolean))];
+  target.callHistory = target.callHistory.filter(entry => entry && typeof entry === "object" && entry.id);
+  target.callHistory.forEach(entry => {
+    (Array.isArray(entry.flags) ? entry.flags : []).forEach(flag => {
+      if (flag && !STORY_DATA.meta.flagNames[flag]) {
+        STORY_DATA.meta.flagNames[flag] = "Прямой вызов: " + (entry.contactName || "контакт") + " — " + (entry.title || "обсуждение темы") + ".";
+      }
+    });
+  });
+  target.surveillanceNotes = target.surveillanceNotes.filter(entry => entry && typeof entry === "object");
   target.inspectedInspects = [...new Set(target.inspectedInspects.map(String).filter(Boolean))];
   target.clues = target.clues.filter(clue => clue && typeof clue === "object" && String(clue.id || "").trim());
   Object.keys(STORY_RELATION_LABELS).forEach(key => {
@@ -3042,6 +3082,9 @@ function archiveAbandonedTimeline(index, oldHistory) {
       kind: d.kind || "story", relation: i < index ? "shared" : "abandoned"
     })),
     transcript: (st.chat || []).slice(-ROUTE_TRANSCRIPT_MAX).map(m => ({t:m.t, k:m.k, f:m.f, n:m.n, no:m.no, pages:m.pages})),
+    callHistory: (st.callHistory || []).map(entry => ({...entry, messages:Array.isArray(entry.messages)?entry.messages.slice():[]})),
+    discussedCalls: (st.discussedCalls || []).slice(),
+    surveillanceNotes: (st.surveillanceNotes || []).map(entry => ({...entry})),
     storyMoments: (st.storyMoments || []).map(m => ({...m})),
     endpoint: {
       chapter: Number(st.currentChapter || st.chap) || 1,
@@ -3050,6 +3093,9 @@ function archiveAbandonedTimeline(index, oldHistory) {
       flags: (st.flags || []).slice(), inventory: (st.inv || []).slice(),
       inspectedInspects: (st.inspectedInspects || []).slice(),
       clues: (st.clues || []).map(clue => ({...clue})),
+      callHistory: (st.callHistory || []).map(entry => ({...entry, messages:Array.isArray(entry.messages)?entry.messages.slice():[]})),
+      discussedCalls: (st.discussedCalls || []).slice(),
+      surveillanceNotes: (st.surveillanceNotes || []).map(entry => ({...entry})),
       unreadMessages: (st.realtimeInbox || []).filter(x => !x.read && !x.answered).length,
       relationships: JSON.parse(JSON.stringify(st.relationships || {})),
       storyVars: JSON.parse(JSON.stringify(st.storyVars || {})),
@@ -4190,6 +4236,16 @@ function viewArchivedTimeline(branch) {
       m.append(el("h3", "Зафиксированные сюжетные последствия"));
       branch.storyMoments.forEach(moment => { const p=el("p", moment.text || ""); p.className="temporal-note"; m.append(p); });
     }
+    if (Array.isArray(branch.callHistory) && branch.callHistory.length) {
+      m.append(el("h3", "Прямые вызовы · сохранённые разговоры"));
+      branch.callHistory.forEach(entry => {
+        const card=el("section",""); card.className="temporal-branch";
+        card.append(el("b", "Глава "+(entry.chapter||"—")+" · "+(entry.contactName||"Контакт")));
+        card.append(el("p", entry.title||"Обсуждённая тема"));
+        if (entry.surveillance) card.append(el("small","Скрытая слежка: "+entry.surveillance));
+        m.append(card);
+      });
+    }
     if (Array.isArray(branch.transcript) && branch.transcript.length) {
       m.append(el("h3", "Последние сообщения оставленной линии"));
       branch.transcript.forEach(msg => { const p=el("p", (msg.f ? "["+msg.f+"] " : "")+(msg.t || "")); p.className="journal-note"; m.append(p); });
@@ -4231,6 +4287,16 @@ function viewCompletedRoute(route) {
     m.append(el("h3", "Выбранный путь"));
     (route.decisions || []).forEach((d,i) => { const p=el("p", (i+1)+". "+d.node+": "+d.text+(d.outcome ? "\nПоследствие: "+d.outcome : "")); p.className="journal-note"; m.append(p); });
     if (Array.isArray(route.flags) && route.flags.length) { m.append(el("h3", "Ключевые флаги")); route.flags.forEach(f => { const label=STORY_DATA.meta.flagNames[f] || f; const p=el("p", "✦ "+label); p.className="journal-note"; m.append(p); }); }
+    if (Array.isArray(route.callHistory) && route.callHistory.length) {
+      m.append(el("h3", "Прямые вызовы · сохранённые разговоры"));
+      route.callHistory.forEach(entry => {
+        const card=el("section",""); card.className="temporal-branch";
+        card.append(el("b", "Глава "+(entry.chapter||"—")+" · "+(entry.contactName||"Контакт")));
+        card.append(el("p", entry.title||"Обсуждённая тема"));
+        if (entry.surveillance) card.append(el("small","Скрытая слежка: "+entry.surveillance));
+        m.append(card);
+      });
+    }
     if (route.relationships && Object.keys(route.relationships).length) {
       m.append(el("h3", "Отношения и судьбы персонажей"));
       Object.entries(route.relationships).forEach(([name,value]) => m.append(el("p", name + ": " + value)));
@@ -4358,6 +4424,18 @@ function viewChronologyLine(line, label) {
         }
       });
       m.append(section);
+    }
+    const callHistory = Array.isArray(line.callHistory) ? line.callHistory : [];
+    if (callHistory.length) {
+      m.append(el("h3", "Прямые вызовы · связь с персонажами"));
+      callHistory.forEach(entry => {
+        const card = el("section", ""); card.className = "temporal-branch";
+        card.append(el("b", "Глава " + (entry.chapter || "—") + " · " + (entry.contactName || "Контакт")));
+        card.append(el("p", entry.title || "Обсуждена тема"));
+        if (entry.trustDelta) card.append(el("small", "Изменение доверия: " + (entry.trustDelta > 0 ? "+" : "") + entry.trustDelta));
+        if (entry.surveillance) card.append(el("small", "Скрытая слежка: " + entry.surveillance));
+        m.append(card);
+      });
     }
     if (moments.length) {
       m.append(el("h3", "Последствия решений"));
@@ -4524,6 +4602,292 @@ function openChronologyFromSplash() {
   });
 }
 
+
+/* ===================== ПРЯМАЯ СВЯЗЬ С ПЕРСОНАЖАМИ ===================== */
+/*
+ * Любой модуль главы может добавлять темы:
+ * window.CHAPTER_CALLS = window.CHAPTER_CALLS || {};
+ * window.CHAPTER_CALLS["brandt"] = [{ id, chapter, title, reqClue, messages,
+ *   trustDelta, addFlags, addClue, surveillance }];
+ *
+ * Если chapter не указан, загрузчик закрепляет тему за модулем, который её добавил.
+ */
+window.CHAPTER_CALLS = window.CHAPTER_CALLS || {};
+const DEMO_BRANDT_CALL_ID = "call_brandt_first_clue_demo";
+
+function ensureDemoChapterCall() {
+  const registry = window.CHAPTER_CALLS = window.CHAPTER_CALLS || {};
+  if (!Array.isArray(registry.brandt)) registry.brandt = [];
+  if (!registry.brandt.some(topic => topic && topic.id === DEMO_BRANDT_CALL_ID)) {
+    registry.brandt.push({
+      id: DEMO_BRANDT_CALL_ID,
+      chapter: 1,
+      title: "Спросить Брандта о записи в судовом журнале",
+      reqClue: "__any_clue__",
+      demo: true,
+      messages: [
+        "— Вы: Капитан, я нашёл зацепку во время осмотра. Время в записи не совпадает с отметкой ночной вахты.",
+        "— Брандт: Значит, ты заметил именно эту строку. Я приказал исправить журнал, но не приказал стирать исходные координаты.",
+        "— Вы: Почему вы скрыли это от команды?",
+        "— Брандт: Потому что под килем тогда прошло нечто, чего не должно было быть в этих водах. Я хотел сначала понять, видел ли это кто-нибудь ещё."
+      ],
+      trustDelta: 1,
+      addFlags: ["СВЯЗЬ_БРАНДТ_ОБСУДИЛ_АНОМАЛИЮ"],
+      addClue: {
+        id: "clue_brandt_original_coordinates",
+        title: "Первоначальные координаты ночной вахты",
+        desc: "Брандт признал, что приказал исправить судовой журнал, но исходные координаты не были уничтожены. Капитан явно знает, что прошло под килем во время ночной вахты."
+      }
+    });
+  }
+}
+
+function bindChapterCallTopics(chapterKey) {
+  const chapterNo = Number(chapterKey);
+  const registry = window.CHAPTER_CALLS = window.CHAPTER_CALLS || {};
+  Object.entries(registry).forEach(([contactId, entries]) => {
+    if (!Array.isArray(entries)) return;
+    registry[contactId] = entries.map(topic => {
+      if (!topic || typeof topic !== "object") return topic;
+      if (topic.chapter != null || topic.chapterNo != null || topic._chapter != null) return topic;
+      return Number.isFinite(chapterNo) && chapterNo > 0 ? {...topic, _chapter: chapterNo} : topic;
+    });
+  });
+  if (chapterNo === 1) ensureDemoChapterCall();
+}
+
+function contactChapterNo() {
+  return Math.max(1, Number(st && (st.currentChapter || st.chap)) || Number(pgInfo().chapterNo) || 1);
+}
+
+function contactHasClueRequirement(reqClue) {
+  if (!reqClue) return true;
+  const required = Array.isArray(reqClue) ? reqClue : [reqClue];
+  return required.some(id => {
+    if (id === "__any_clue__") return Array.isArray(st.clues) && st.clues.length > 0;
+    return (st.clues || []).some(clue => clue && String(clue.id) === String(id));
+  });
+}
+
+function contactTopicsFor(contactId, chapterNo = contactChapterNo()) {
+  const registry = window.CHAPTER_CALLS || {};
+  const entries = Array.isArray(registry[contactId]) ? registry[contactId] : [];
+  return entries.filter(topic => {
+    if (!topic || typeof topic !== "object" || !topic.id || !topic.title) return false;
+    const topicChapter = Number(topic.chapter || topic.chapterNo || topic._chapter || chapterNo);
+    return topicChapter === Number(chapterNo) && contactHasClueRequirement(topic.reqClue);
+  });
+}
+
+function contactTrustLabel(contactId) {
+  ensureStoryState();
+  const score = Number(st.relationships[contactId]) || 0;
+  if (score >= 3) return "Высокое";
+  if (score <= -2) return "Настороженное";
+  return "Нейтральное";
+}
+
+function contactCharacter(contactId) {
+  return DOSSIER_DATA.find(person => person.id === contactId) || {
+    id: contactId,
+    name: STORY_RELATION_LABELS[contactId] || contactId,
+    role: "Знакомый персонаж"
+  };
+}
+
+async function openContactChannel() {
+  if (!st) return;
+  ensureStoryState();
+  ensureDossierList();
+  const chapterNo = contactChapterNo();
+  try {
+    await loadChapter(chapterNo);
+    bindChapterCallTopics(chapterNo);
+  } catch (error) {
+    modal(m => {
+      m.append(el("h3", "КАНАЛ СВЕТА · КОНТАКТЫ"));
+      m.append(el("p", "Не удалось загрузить темы текущей главы: " + error.message));
+      m.append(el("p", "Проверьте, что файл главы находится в папке chapters рядом с index.html."));
+    });
+    return;
+  }
+  openContactRoster();
+}
+
+function openContactRoster() {
+  if (!st) return;
+  ensureDossierList();
+  const chapterNo = contactChapterNo();
+  const people = DOSSIER_DATA.filter(person => st.dossiers.includes(person.id) && person.id !== "aerkhis" && person.id in STORY_RELATION_LABELS);
+  modal(m => {
+    m.append(el("h3", "КАНАЛ СВЕТА · КОНТАКТЫ"));
+    m.append(el("p", "Глава " + chapterNo + " · доступны только уже знакомые персонажи из Досье."));
+    const roster = el("div", ""); roster.className = "call-roster";
+    if (!people.length) {
+      roster.append(el("p", "Контакты пока не установлены. Продолжайте сюжет и знакомьтесь с экипажем."));
+    }
+    people.forEach(person => {
+      const topics = contactTopicsFor(person.id, chapterNo);
+      const button = el("button", ""); button.type = "button"; button.className = "call-contact";
+      const name = el("strong", person.name); const role = el("small", person.role || "");
+      const trust = el("small", "Доверие: " + contactTrustLabel(person.id)); trust.className = "call-trust";
+      const count = el("small", topics.length ? "Доступно тем: " + topics.length : "Новых тем для этой главы пока нет");
+      button.append(name, role, trust, count);
+      button.onclick = () => openContactTopics(person.id);
+      roster.append(button);
+    });
+    m.append(roster);
+    const note = el("p", "Разговоры не меняют текущий сюжетный узел. Их последствия сохраняются в отношениях, Журнале и Хронологии временных линий.");
+    note.className = "temporal-note"; m.append(note);
+  });
+}
+
+function openContactTopics(contactId) {
+  if (!st) return;
+  const person = contactCharacter(contactId);
+  const chapterNo = contactChapterNo();
+  const topics = contactTopicsFor(contactId, chapterNo);
+  modal(m => {
+    const heading = el("h3", "КАНАЛ СВЕТА · " + String(person.name).toUpperCase());
+    m.append(heading);
+    m.append(el("p", person.role || "Контакт"));
+    const trust = el("p", "Доверие: " + contactTrustLabel(contactId));
+    trust.className = "call-trust"; m.append(trust);
+    const back = el("button", "← К списку контактов"); back.type = "button"; back.onclick = () => openContactRoster(); m.append(back);
+    const list = el("div", ""); list.className = "call-topics";
+    if (!topics.length) {
+      list.append(el("p", "В этой главе пока нет доступных тем. Новые вопросы могут появиться после обнаружения определённых улик."));
+    }
+    topics.forEach(topic => {
+      const discussed = (st.discussedCalls || []).includes(String(topic.id));
+      const button = el("button", ""); button.type = "button"; button.className = "call-topic";
+      const title = el("strong", (discussed ? "✓ [Обсуждено] " : "◈ ") + topic.title);
+      const detail = el("small", discussed ? "Эта тема уже обсуждалась в текущей временной линии." : (topic.demo ? "Демонстрационная тема · открывается после обнаружения любой улики." : "Глава " + chapterNo + " · прямой вызов"));
+      button.append(title, detail); button.disabled = discussed;
+      button.onclick = () => playContactTopic(contactId, topic);
+      list.append(button);
+    });
+    m.append(list);
+  });
+}
+
+function playContactTopic(contactId, topic) {
+  if (!st || !topic || !topic.id) return;
+  ensureStoryState();
+  const topicId = String(topic.id);
+  if (st.discussedCalls.includes(topicId)) {
+    openContactTopics(contactId);
+    return;
+  }
+  if (!contactHasClueRequirement(topic.reqClue)) {
+    modal(m => {
+      m.append(el("h3", "ТЕМА ЗАКРЫТА"));
+      m.append(el("p", "Для этого разговора нужна дополнительная улика из Журнала."));
+    });
+    return;
+  }
+
+  const person = contactCharacter(contactId);
+  const chapterNo = contactChapterNo();
+  const messages = Array.isArray(topic.messages) ? topic.messages.map(message =>
+    typeof message === "string" ? message : String(message && (message.text || message.message) || "")
+  ).filter(Boolean) : [];
+
+  st.discussedCalls.push(topicId);
+  const delta = Math.max(-1, Math.min(1, Number(topic.trustDelta) || 0));
+  if (contactId in STORY_RELATION_LABELS) {
+    st.relationships[contactId] = Math.max(-100, Math.min(100, (Number(st.relationships[contactId]) || 0) + delta));
+  }
+
+  const flags = [].concat(topic.addFlags || []).filter(Boolean).map(String);
+  flags.forEach(flag => {
+    if (!STORY_DATA.meta.flagNames[flag]) {
+      STORY_DATA.meta.flagNames[flag] = "Во время прямого вызова: " + person.name + " — " + topic.title + ".";
+    }
+  });
+  if (flags.length) recordFlags(flags);
+
+  let addedClue = null;
+  if (topic.addClue && topic.addClue.id && !(st.clues || []).some(clue => clue && clue.id === topic.addClue.id)) {
+    addedClue = {
+      ...topic.addClue,
+      nodeId: st.node || null,
+      chapter: chapterNo,
+      discoveredAt: Date.now(),
+      read: false,
+      source: "direct-call",
+      contactId
+    };
+    st.clues.push(addedClue);
+  }
+
+  let surveillanceNote = null;
+  if (topic.surveillance || topic.revealSurveillance) {
+    const raw = topic.surveillance;
+    surveillanceNote = {
+      id: topicId + ":surveillance",
+      contactId,
+      contactName: person.name,
+      text: typeof raw === "string" ? raw : (raw && (raw.text || raw.description)) || "Во время разговора обнаружен след скрытого наблюдения.",
+      chapter: chapterNo,
+      nodeId: st.node || null,
+      discoveredAt: Date.now()
+    };
+    st.surveillanceNotes.push(surveillanceNote);
+  }
+
+  const record = {
+    id: topicId,
+    contactId,
+    contactName: person.name,
+    title: topic.title,
+    chapter: chapterNo,
+    nodeId: st.node || null,
+    timelineId: Number(st.activeTimelineId || st.timelineId) || 1,
+    at: Date.now(),
+    messages: messages.slice(),
+    trustDelta: delta,
+    flags: flags.slice(),
+    clueId: addedClue && addedClue.id || null,
+    surveillance: surveillanceNote ? surveillanceNote.text : null
+  };
+  st.callHistory.push(record);
+  st.callHistory = st.callHistory.slice(-200);
+  st.storyMoments = Array.isArray(st.storyMoments) ? st.storyMoments : [];
+  st.storyMoments.push({type:"direct-call", text:"Прямой вызов: " + person.name + " — " + topic.title, at:record.at, nodeId:record.nodeId});
+  st.storyMoments = st.storyMoments.slice(-200);
+  save();
+  status();
+
+  modal(m => {
+    m.append(el("h3", "ПРЯМОЙ ВЫЗОВ · " + String(person.name).toUpperCase()));
+    m.append(el("p", topic.title));
+    const transcript = el("div", ""); transcript.className = "call-transcript";
+    if (!messages.length) transcript.append(el("p", "Связь установлена, но собеседник не ответил."));
+    messages.forEach(line => {
+      const bubble = el("div", line); bubble.className = "call-line";
+      if (/^(?:—\s*)?(?:вы|игрок)\s*:/i.test(line)) bubble.classList.add("player");
+      else bubble.classList.add("contact");
+      transcript.append(bubble);
+    });
+    m.append(transcript);
+    const relation = el("p", "Доверие: " + contactTrustLabel(contactId) + (delta ? " · изменение " + (delta > 0 ? "+" : "") + delta : " · без изменений"));
+    relation.className = "call-trust"; m.append(relation);
+    if (addedClue) {
+      const clue = el("section", ""); clue.className = "clue-entry";
+      clue.append(el("b", "🔎 Новая улика: " + (addedClue.title || "Зацепка")));
+      clue.append(el("p", addedClue.desc || ""));
+      m.append(clue);
+    }
+    if (surveillanceNote) {
+      const surveillance = el("p", "◉ СЛЕД СКРЫТОЙ СЛЕЖКИ · " + surveillanceNote.text);
+      surveillance.className = "call-result"; m.append(surveillance);
+    }
+    if (flags.length) m.append(el("p", "Зафиксированы сюжетные отметки: " + flags.join(", ")));
+    const done = el("button", "Вернуться к контактам"); done.type = "button"; done.onclick = () => openContactRoster(); m.append(done);
+  });
+}
+
 function openJournal() {
   if (!st) return;
   ensureStoryState();
@@ -4532,64 +4896,95 @@ function openJournal() {
   const notes = st.flags.filter(f => STORY_DATA.meta.flagNames[f]);
   const unseen = new Set(notes.filter(f => !st.journalSeen.includes(f)));
   modal(m => {
-    m.append(el("h3", "ЖУРНАЛ НАБЛЮДАТЕЛЯ"));
-    m.append(el("p", STORY_DATA.meta.title + " · " + STORY_DATA.meta.author));
-    m.append(el("p", "Позывной: " + st.hero + " · путь: " + st.arch));
-    m.append(el("p", "Навыки: " + st.skills.join(", ")));
-    m.append(el("p", LB.hp + " " + st.hp + "/20 · " + LB.o2 + " " + st.o2 + "% · " + LB.en + " " + st.en + "% · " + LB.ammo + " " + st.ammo));
-    m.append(el("p", pgTxt()));
+    const mainPanel = el("section", ""); mainPanel.className = "journal-pane";
+    const cluesPanel = el("section", ""); cluesPanel.className = "journal-pane"; cluesPanel.hidden = true;
+    const tabBar = el("div", ""); tabBar.className = "journal-tabs";
+    const mainTab = el("button", "📓 Записи"); mainTab.type = "button"; mainTab.className = "journal-tab active";
+    const cluesTab = el("button", "🔎 Улики и тайны"); cluesTab.type = "button"; cluesTab.className = "journal-tab";
+    const activateTab = tab => {
+      const showClues = tab === "clues";
+      mainPanel.hidden = showClues; cluesPanel.hidden = !showClues;
+      mainTab.classList.toggle("active", !showClues);
+      cluesTab.classList.toggle("active", showClues);
+      if (showClues) {
+        (st.clues || []).forEach(clue => { if (clue) clue.read = true; });
+        cluesPanel.querySelectorAll(".journal-note-new").forEach(card => card.classList.remove("journal-note-new"));
+        save(); updateJournalBadge();
+      }
+    };
+    mainTab.onclick = () => activateTab("main");
+    cluesTab.onclick = () => activateTab("clues");
+    tabBar.append(mainTab, cluesTab);
+    mainPanel.append(el("h3", "ЖУРНАЛ НАБЛЮДАТЕЛЯ"));
+    mainPanel.append(el("p", STORY_DATA.meta.title + " · " + STORY_DATA.meta.author));
+    mainPanel.append(el("p", "Позывной: " + st.hero + " · путь: " + st.arch));
+    mainPanel.append(el("p", "Навыки: " + st.skills.join(", ")));
+    mainPanel.append(el("p", LB.hp + " " + st.hp + "/20 · " + LB.o2 + " " + st.o2 + "% · " + LB.en + " " + st.en + "% · " + LB.ammo + " " + st.ammo));
+    mainPanel.append(el("p", pgTxt()));
+    mainPanel.append(el("p", "Отдельный раздел «Улики и тайны» собирает все обнаруженные зацепки и позволяет открывать скрытые вопросы персонажам через канал связи."));
+    m.append(tabBar, mainPanel, cluesPanel);
     ensureRealtimeState();
     const unreadInbox = st.realtimeInbox.filter(x => !x.read && !x.answered).length;
-    m.append(el("h3", "Входящие сообщения · режим реального времени"));
+    mainPanel.append(el("h3", "Входящие сообщения · режим реального времени"));
     const inboxButton = el("button", "📨 Открыть входящие сообщения" + (unreadInbox ? " · новых: " + unreadInbox : ""));
-    inboxButton.type = "button"; inboxButton.onclick = () => openRealtimeInbox(); m.append(inboxButton);
-    m.append(el("p", "Сообщения могут приходить по таймеру внутри авторской сцены. Можно ответить сразу или позже: входящие остаются в сохранении и ждут вашего ответа."));
-    m.append(el("h3", "Записи наблюдателя"));
-    if (!notes.length) m.append(el("p", "Записей пока нет. Важные решения и открытия будут сохраняться здесь."));
+    inboxButton.type = "button"; inboxButton.onclick = () => openRealtimeInbox(); mainPanel.append(inboxButton);
+    mainPanel.append(el("p", "Сообщения могут приходить по таймеру внутри авторской сцены. Можно ответить сразу или позже: входящие остаются в сохранении и ждут вашего ответа."));
+    mainPanel.append(el("h3", "Записи наблюдателя"));
+    if (!notes.length) mainPanel.append(el("p", "Записей пока нет. Важные решения и открытия будут сохраняться здесь."));
     notes.forEach(f => {
       const p = el("p", (unseen.has(f) ? "✦ НОВАЯ ЗАПИСЬ · " : "• ") + STORY_DATA.meta.flagNames[f]);
       p.className = unseen.has(f) ? "journal-note journal-note-new" : "journal-note";
-      m.append(p);
+      mainPanel.append(p);
     });
-    m.append(el("h3", "Улики и находки"));
+    cluesPanel.append(el("h3", "УЛИКИ И ТАЙНЫ"));
+    cluesPanel.append(el("p", "Все зацепки, найденные при осмотре локаций и во время прямых вызовов. Некоторые из них открывают скрытые темы разговоров."));
     if (!st.clues.length) {
-      m.append(el("p", "Улик пока нет. Ищите доступные точки осмотра в секции «Исследовать окружение» во время сюжетных сцен."));
+      cluesPanel.append(el("p", "Улик пока нет. Ищите доступные точки осмотра в секции «Исследовать окружение» во время сюжетных сцен."));
     } else {
       st.clues.slice().sort((a,b) => Number(a.discoveredAt || 0) - Number(b.discoveredAt || 0)).reverse().forEach(clue => {
-        const card = el("section", ""); card.className = "journal-note" + (clue.read ? "" : " journal-note-new");
-        const chapter = Number(String(clue.nodeId || "").match(/^c(\d+)_/)?.[1] || 0);
+        const card = el("section", ""); card.className = "clue-entry" + (clue.read ? "" : " journal-note-new");
+        const chapter = Number(clue.chapter || String(clue.nodeId || "").match(/^c(\d+)_/)?.[1] || 0);
         card.append(el("b", "🔎 " + (clue.title || "Найденная улика")));
-        if (chapter) card.append(el("small", "Глава " + chapter + " · " + (clue.nodeId || "")));
+        if (chapter || clue.nodeId) card.append(el("small", (chapter ? "Глава " + chapter : "Источник") + (clue.nodeId ? " · " + clue.nodeId : "")));
         card.append(el("p", clue.desc || "Описание находки не задано."));
-        m.append(card);
-        clue.read = true;
+        cluesPanel.append(card);
+      });
+    }
+    if (Array.isArray(st.callHistory) && st.callHistory.length) {
+      mainPanel.append(el("h3", "Прямые вызовы · история контактов"));
+      st.callHistory.slice().reverse().forEach(entry => {
+        const item = el("section", ""); item.className = "journal-note";
+        item.append(el("b", "📡 " + (entry.contactName || "Контакт") + " · " + (entry.title || "Разговор")));
+        item.append(el("small", "Глава " + (entry.chapter || "—") + " · " + new Date(entry.at || 0).toLocaleString()));
+        if (entry.surveillance) item.append(el("p", "Скрытая слежка: " + entry.surveillance));
+        mainPanel.append(item);
       });
     }
     ensureMetaProgress();
     const temporal = el("section", ""); temporal.className = "temporal-panel" + (isChronicleUnlocked() ? "" : " temporal-locked");
     temporal.append(el("strong", isChronicleUnlocked() ? "ХРОНОЛОГИЯ · РАЗБЛОКИРОВАНА" : "ХРОНОЛОГИЯ · ЗАБЛОКИРОВАНА"));
     temporal.append(el("p", isChronicleUnlocked() ? "Теперь можно вернуться к любому сохранённому решению этой линии, изменить его и пройти историю заново с этой точки. Предыдущая версия пути сохраняется в архиве с решениями, судьбами персонажей и сообщениями." : "Откроется после первого финала"));
-    m.append(temporal);
+    mainPanel.append(temporal);
     if (metaProgress.chronicleUnlocked && metaProgress.t2Unlocked) {
       const observer = el("section", ""); observer.className = "t2-observer";
       observer.append(el("strong", "Т2 · НАБЛЮДАТЕЛЬ МЕЖДУ ЛИНИЯМИ"));
       observer.append(el("p", "«" + nextT2Observation("chronology") + "»"));
       observer.append(el("small", t2MemorySummary()));
       const talk = el("button", "Ответить Т2 между временными линиями"); talk.type = "button"; talk.onclick = () => openT2Chat(); observer.append(talk);
-      m.append(observer);
+      mainPanel.append(observer);
     }
     ensureTimelineState(st);
-    m.append(el("h3", "Архив временных линий"));
-    if (!st.timelines.length) m.append(el("p", "Первый завершённый путь появится здесь после достижения финала."));
+    mainPanel.append(el("h3", "Архив временных линий"));
+    if (!st.timelines.length) mainPanel.append(el("p", "Первый завершённый путь появится здесь после достижения финала."));
     st.timelines.slice().reverse().forEach(line => {
       const card = el("section", ""); card.className = "temporal-branch";
       card.append(el("b", "Линия №" + line.timelineId + " · " + (line.endingTitle || "Завершённая линия")));
       card.append(el("small", "Финал: " + (line.endingId || "—") + " · решений: " + ((line.decisions || []).length) + " · завершена: " + new Date(line.completedAt || 0).toLocaleString()));
       card.append(el("p", "Сохранены выборы, сюжетные флаги, отношения и состояния персонажей, ресурсы, сообщения и последствия этой ветки."));
       const b = el("button", "Посмотреть завершённую временную линию"); b.type = "button"; b.onclick = () => viewCompletedRoute(line); card.append(b);
-      m.append(card);
+      mainPanel.append(card);
     });
-    m.append(el("h3", "ХРОНОЛОГИЯ"));
+    mainPanel.append(el("h3", "ХРОНОЛОГИЯ"));
     const lineChoices = [];
     (st.timelines || []).forEach(line => lineChoices.push({key:"saved:"+line.timelineId+":"+line.endingId, label:"Линия №"+line.timelineId+" · "+(line.endingTitle || "финал"), data:line}));
     (metaProgress.completedRoutes || []).forEach((line,i) => lineChoices.push({key:"completed:"+i, label:"Линия №"+(line.timelineId || "—")+" · "+(line.endingTitle || "завершена"), data:line}));
@@ -4609,9 +5004,9 @@ function openJournal() {
       } else if (selected) viewChronologyLine(selected.data, selected.label);
       lineSelect.value = "active";
     };
-    m.append(lineSelect);
-    m.append(el("p", "Выберите сохранённую линию, чтобы сравнить пройденные главы, решения, последствия и состояние персонажей. Просмотр архива не изменяет активное прохождение."));
-    m.append(el("h3", "Карта пройденных узлов · главы 1–19"));
+    mainPanel.append(lineSelect);
+    mainPanel.append(el("p", "Выберите сохранённую линию, чтобы сравнить пройденные главы, решения, последствия и состояние персонажей. Просмотр архива не изменяет активное прохождение."));
+    mainPanel.append(el("h3", "Карта пройденных узлов · главы 1–19"));
     const chapterMap = el("div", ""); chapterMap.className = "dossier-list chronology-map";
     const mapDecisions = Array.isArray(st.decisionHistory) ? st.decisionHistory : [];
     const visitedNodeIds = Array.isArray(st.visitedNodes) ? st.visitedNodes : [];
@@ -4627,27 +5022,27 @@ function openJournal() {
       if (!chapterNodes.length && !rows.length) chapterCard.append(el("small", "Узлы и решения появятся здесь после прохождения соответствующей главы."));
       rows.forEach(d=>{
         const item=el("div",""); item.className="journal-note";
-        item.append(el("b", d.node || "Сюжетный узел"));
-        item.append(el("p", d.text || "Принятое решение"));
-        if (d.moment && d.moment.text) item.append(el("small","Последствие: "+d.moment.text));
+        itemainPanel.append(el("b", d.node || "Сюжетный узел"));
+        itemainPanel.append(el("p", d.text || "Принятое решение"));
+        if (d.moment && d.moment.text) itemainPanel.append(el("small","Последствие: "+d.moment.text));
         const change=el("button", "Изменить решение в этой точке"); change.type="button";
         change.disabled=!isChronicleUnlocked() || !d.snapshot;
         change.textContent=isChronicleUnlocked()?"Изменить решение в этой точке":"Откроется после первого финала";
         change.onclick=()=>rewindDecision(d._index);
-        item.append(change); chapterCard.append(item);
+        itemainPanel.append(change); chapterCard.append(item);
       });
       chapterMap.append(chapterCard);
     }
-    m.append(chapterMap);
-    m.append(el("h3", "История решений · изменить любой прошлый выбор"));
+    mainPanel.append(chapterMap);
+    mainPanel.append(el("h3", "История решений · изменить любой прошлый выбор"));
     const decisions = Array.isArray(st.decisionHistory) ? st.decisionHistory : [];
-    m.append(el("p", "В этой временной линии сохранено решений: " + decisions.length + ". История не обрезается по фиксированному числу: можно вернуться к любому сохранённому выбору после разблокировки Хронологии."));
+    mainPanel.append(el("p", "В этой временной линии сохранено решений: " + decisions.length + ". История не обрезается по фиксированному числу: можно вернуться к любому сохранённому выбору после разблокировки Хронологии."));
     if (temporalMainSaveFailed || temporalMetaSaveFailed) {
       const warning = el("p", "ВНИМАНИЕ: браузер сообщил о нехватке места для сохранения. Экспортируйте резервную копию сохранения и освободите место, иначе самые новые изменения могут не сохраниться.");
-      warning.className = "journal-note journal-note-new"; m.append(warning);
+      warning.className = "journal-note journal-note-new"; mainPanel.append(warning);
     }
     if (!decisions.length) {
-      m.append(el("p", "Здесь будут сохраняться принятые решения. После разблокировки Хронологии их можно будет пересматривать."));
+      mainPanel.append(el("p", "Здесь будут сохраняться принятые решения. После разблокировки Хронологии их можно будет пересматривать."));
     } else {
       const historyBox = el("div", ""); historyBox.className = "dossier-list";
       decisions.slice().reverse().forEach((d, reverseIndex) => {
@@ -4662,41 +5057,41 @@ function openJournal() {
         b.onclick = () => rewindDecision(realIndex);
         card.append(b); historyBox.append(card);
       });
-      m.append(historyBox);
+      mainPanel.append(historyBox);
     }
-    m.append(el("h3", "Архив альтернативных линий"));
-    if (!metaProgress.alternateLines.length) m.append(el("p", "Когда вы измените решение после разблокировки режима, прежняя версия пути будет сохранена здесь."));
+    mainPanel.append(el("h3", "Архив альтернативных линий"));
+    if (!metaProgress.alternateLines.length) mainPanel.append(el("p", "Когда вы измените решение после разблокировки режима, прежняя версия пути будет сохранена здесь."));
     metaProgress.alternateLines.forEach(branch => {
       const card=el("section", ""); card.className="temporal-branch";
       card.append(el("b", "Линия №"+branch.id+" · развилка в "+branch.forkNode));
       card.append(el("small", "Оставлено после решения: "+(branch.changedChoice||"—")+" · последняя сцена: "+(branch.endingNode||"неизвестно")));
-      const b=el("button", "Посмотреть решения и последствия этой линии"); b.type="button"; b.onclick=()=>viewArchivedTimeline(branch); card.append(b); m.append(card);
+      const b=el("button", "Посмотреть решения и последствия этой линии"); b.type="button"; b.onclick=()=>viewArchivedTimeline(branch); card.append(b); mainPanel.append(card);
     });
-    m.append(el("h3", "Завершённые сюжетные линии"));
-    if (!metaProgress.completedRoutes.length) m.append(el("p", "После первого полноценного финала здесь появится архив завершённых прохождений."));
+    mainPanel.append(el("h3", "Завершённые сюжетные линии"));
+    if (!metaProgress.completedRoutes.length) mainPanel.append(el("p", "После первого полноценного финала здесь появится архив завершённых прохождений."));
     metaProgress.completedRoutes.slice().reverse().forEach(route => {
       const card=el("section", ""); card.className="temporal-branch";
       card.append(el("b", "Линия №"+(route.timelineId||"—")+" · "+(route.endingTitle||"Финал")));
       card.append(el("small", "Последняя сцена: "+(route.node||"—")+" · решений: "+((route.decisions||[]).length)));
-      const b=el("button", "Посмотреть завершённый маршрут"); b.type="button"; b.onclick=()=>viewCompletedRoute(route); card.append(b); m.append(card);
+      const b=el("button", "Посмотреть завершённый маршрут"); b.type="button"; b.onclick=()=>viewCompletedRoute(route); card.append(b); mainPanel.append(card);
     });
     if (metaProgress.chronicleUnlocked) {
-      m.append(el("h3", "Связь с T2 · искажённая временная копия"));
-      const t2Button=el("button", "🛰 Открыть канал T2"); t2Button.type="button"; t2Button.onclick=()=>openT2Chat(); m.append(t2Button);
-      m.append(el("p", "Ваши ответы могут поддержать T2, усилить его враждебность или заставить его сомневаться в ваших данных. Отношение сохраняется между временными линиями."));
+      mainPanel.append(el("h3", "Связь с T2 · искажённая временная копия"));
+      const t2Button=el("button", "🛰 Открыть канал T2"); t2Button.type="button"; t2Button.onclick=()=>openT2Chat(); mainPanel.append(t2Button);
+      mainPanel.append(el("p", "Ваши ответы могут поддержать T2, усилить его враждебность или заставить его сомневаться в ваших данных. Отношение сохраняется между временными линиями."));
     }
-    m.append(el("h3", "Открытые моменты истории"));
-    if (!st.storyMoments || !st.storyMoments.length) m.append(el("p", "Особые сюжетные моменты появятся после первых решений."));
+    mainPanel.append(el("h3", "Открытые моменты истории"));
+    if (!st.storyMoments || !st.storyMoments.length) mainPanel.append(el("p", "Особые сюжетные моменты появятся после первых решений."));
     (st.storyMoments || []).slice(-12).reverse().forEach(moment => {
-      const p = el("p", "✦ " + moment.text); p.className = "journal-note"; m.append(p);
+      const p = el("p", "✦ " + moment.text); p.className = "journal-note"; mainPanel.append(p);
     });
     const notifyButton = el("button", st.notificationsEnabled ? "🔔 Уведомления включены" : "🔔 Включить уведомления о готовности сообщений");
     notifyButton.type = "button"; notifyButton.disabled = st.notificationsEnabled;
     notifyButton.onclick = () => requestStoryNotifications();
-    m.append(notifyButton);
-    m.append(el("p", "Сюжетные ожидания и входящие сообщения используют абсолютные дедлайны и сохраняются при закрытии: можно ответить сразу или позже. Если страница остаётся запущенной, браузер может показать системное уведомление; если приложение было закрыто, просроченное сообщение появится во входящих при следующем запуске. Гарантированная доставка push при полностью закрытом Telegram Mini App требует серверного планировщика, базы данных и отправки сообщения через Telegram Bot API."));
-    m.append(el("h3", "Оглавление · 1600 символов = 1 страница · до " + authoredBookTotalPages() + " стр. написанного текста"));
-    const legend = el("p", "✓ Пройдено · ▶ Текущая глава · 🔒 Впереди"); legend.className = "toc-legend"; m.append(legend);
+    mainPanel.append(notifyButton);
+    mainPanel.append(el("p", "Сюжетные ожидания и входящие сообщения используют абсолютные дедлайны и сохраняются при закрытии: можно ответить сразу или позже. Если страница остаётся запущенной, браузер может показать системное уведомление; если приложение было закрыто, просроченное сообщение появится во входящих при следующем запуске. Гарантированная доставка push при полностью закрытом Telegram Mini App требует серверного планировщика, базы данных и отправки сообщения через Telegram Bot API."));
+    mainPanel.append(el("h3", "Оглавление · 1600 символов = 1 страница · до " + authoredBookTotalPages() + " стр. написанного текста"));
+    const legend = el("p", "✓ Пройдено · ▶ Текущая глава · 🔒 Впереди"); legend.className = "toc-legend"; mainPanel.append(legend);
     const toc = el("div", ""); toc.className = "toc";
     const current = Math.max(1, Math.min(20, Number(st.chap || pgInfo().c?.no || 1)));
     STORY_DATA.meta.chapters.forEach(c => {
@@ -4717,8 +5112,8 @@ function openJournal() {
       };
       toc.append(row);
     });
-    m.append(toc);
-    m.append(el("h3", "Персонажи / Досье"));
+    mainPanel.append(toc);
+    mainPanel.append(el("h3", "Персонажи / Досье"));
     ensureDossierList();
     const dossierList = el("div", ""); dossierList.className = "dossier-list";
     const unlockedDossiers = DOSSIER_DATA.filter(d => st.dossiers.includes(d.id));
@@ -4736,17 +5131,17 @@ function openJournal() {
       }
       dossierList.append(card);
     });
-    m.append(dossierList);
+    mainPanel.append(dossierList);
     if (unlockedDossiers.length <= 2) {
       const hint = el("p", "Новые досье будут открываться по мере знакомства с экипажем.");
-      hint.className = "dossier-hint"; m.append(hint);
+      hint.className = "dossier-hint"; mainPanel.append(hint);
     }
   });
   st.journalSeen = [...new Set([...st.journalSeen, ...notes])];
-  if (Array.isArray(st.clues)) st.clues.forEach(clue => { if (clue) clue.read = true; });
   save(); updateJournalBadge();
 }
 $("#bLog").addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); openJournal(); });
+$("#bCall").addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); sfx.click(); openContactChannel(); });
 $("#modal").addEventListener("click", e => { if (e.target === $("#modal")) { $("#modal").classList.remove("on"); $("#modal").setAttribute("aria-hidden", "true"); } });
 
 // Абсолютные дедлайны переживают закрытие вкладки: при возвращении браузер
