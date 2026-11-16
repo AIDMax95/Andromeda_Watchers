@@ -267,32 +267,38 @@ body {
   text-shadow: 0 1px 1px #0008;
 }
 #game .m.spk { color: #e1e5e8; }
-/* Реплики Аэ́рхиса: отдельный холодный серебристо-голубой акцент. */
-#game .m.spk.hero-speech {
-  border-left: 3px solid #7dd3fc;
-  padding-left: 12px;
-  text-indent: .35em;
+/* Реплики Аэ́рхиса — холодная акцентная карточка; остальные голоса — тёплая янтарная. */
+#game .m.spk.speech-hero, #game .m.spk.hero-speech {
+  border-left: 3px solid #38bdf8;
+  border-radius: 0 9px 9px 0;
+  background: rgba(56, 189, 248, 0.08);
+  padding: 10px 15px 10px 16px;
+  margin: 3px 0;
+  text-indent: 0;
   color: #e0edf7;
-  text-shadow: 0 0 10px #7dd3fc24, 0 1px 1px #0008;
-  box-shadow: -3px 0 12px -8px #7dd3fcaa;
+  text-shadow: 0 0 10px rgba(56, 189, 248, .14), 0 1px 1px #0008;
+  box-shadow: inset 0 0 18px rgba(56, 189, 248, .035), -3px 0 13px -8px rgba(56, 189, 248, .8);
 }
+#game .m.spk.speech-npc {
+  border-left: 2px solid rgba(251, 191, 36, 0.45);
+  border-radius: 0 8px 8px 0;
+  background: rgba(251, 191, 36, 0.035);
+  padding: 7px 13px 7px 14px;
+  margin: 2px 0;
+  text-indent: 0;
+  color: #e1e5e8;
+}
+#game .m.spk.speech-hero .dash { color: #38bdf8; }
+#game .m.spk.speech-npc .dash { color: #fbbf24; }
 #game .m.spk .hero-name {
-  color: #e7f6ff;
+  color: #38bdf8;
   font-weight: 700;
-  text-shadow: 0 0 8px #7dd3fc55;
+  text-shadow: 0 0 9px rgba(56, 189, 248, .55);
 }
 #game .m.spk .speaker-name {
-  color: #e8bd68;
+  color: #fbbf24;
   font-weight: 700;
-  text-shadow: 0 0 7px #d99a3b24;
-}
-#game .m.spk[data-speaker] {
-  padding-top: 3px;
-  padding-bottom: 3px;
-}
-#game .m.spk[data-speaker]:not(.hero-speech) {
-  border-left: 2px solid #d6a34e88;
-  padding-left: 12px;
+  text-shadow: 0 0 8px rgba(251, 191, 36, .22);
 }
 /* Абзац появляется целиком, без посимвольного изменения ширины и переносов. */
 @keyframes paragraphInkReveal {
@@ -687,15 +693,30 @@ function loadChapter(chapterNum) {
           return;
         }
       } else {
-        const missing = Object.keys(STORY_NODE_CHAPTER).filter(id => STORY_NODE_CHAPTER[id] === key && !STORY_DATA.nodes[id]);
+        const partManifest = STORY_DATA.meta && STORY_DATA.meta.chapterPartNodeManifest
+          ? STORY_DATA.meta.chapterPartNodeManifest[String(key)]
+          : null;
+        const declaredPartNodes = Array.isArray(partManifest)
+          ? partManifest
+          : (partManifest && Array.isArray(partManifest.nodes) ? partManifest.nodes : null);
+        const expectedNodeIds = partManifest && partManifest.complete === false && declaredPartNodes
+          ? declaredPartNodes
+          : Object.keys(STORY_NODE_CHAPTER).filter(id => STORY_NODE_CHAPTER[id] === key);
+        const missing = expectedNodeIds.filter(id => STORY_NODE_CHAPTER[id] !== key || !STORY_DATA.nodes[id]);
         if (missing.length) {
-          reject(new Error("Модуль главы " + key + " не зарегистрировал узлы: " + missing.join(", ")));
+          reject(new Error("Модуль главы " + key + " не зарегистрировал узлы текущей части: " + missing.join(", ")));
           return;
         }
         if (typeof window.applyChoiceOutcomesToLoadedNodes === "function") window.applyChoiceOutcomesToLoadedNodes();
       }
       bindChapterCallTopics(key);
       loadedStoryChapters.add(key);
+      // Новая глава заменила оценку её объёма фактическим текстом; обновляем весь объём книги.
+      longestStoryMemo.clear();
+      chapterPathMemo.clear();
+      authoredBookTotalPagesMemo = null;
+      recalculateAuthoredBookTotalPages();
+      if (st) status();
       resolve(key);
     };
     script.onerror = () => {
@@ -746,7 +767,6 @@ async function loadChaptersForState(targetState) {
 window.loadChapter = loadChapter;
 window.enterStoryNode = enter;
 window.STORY_NODE_CHAPTER = STORY_NODE_CHAPTER;
-STORY_DATA.meta.authoredBookPages = 74;
 STORY_DATA.meta.chapterProjections = STORY_CHAPTER_PROJECTIONS;
 
 Object.assign(STORY_DATA.meta.flagNames, {
@@ -810,6 +830,7 @@ Object.assign(STORY_DATA.meta.flagNames, {
   "ЗАВЕРШИЛ_ГЛАВУ_4_ЧИСТО": "Вы покинули «Норд-7», не вступая в перестрелку с «Эгидой-Норд»",
   "ЗАВЕРШИЛ_ГЛАВУ_4_С_БОЕМ": "Вы вырвались с «Норд-7» после вооружённого столкновения с «Эгидой-Норд»",
   "ПРИБЫЛ_В_СКАРСВОГ": "«Северный горизонт» прибыл в порт Скарсвог",
+  "ПРИБЫЛ_В_ПОРТ_СКАРСВОГ": "«Северный горизонт» вошёл в порт Скарсвог",
   "ВСТРЕТИЛ_РАГНАРА_И_АСТРИД": "Вы познакомились с Рагнаром Торвальдсеном и Астрид Сольберг",
   "ОЦЕНИЛ_ПРИБОРЫ_АСТРИД": "Вы изучили приборы и датчики Астрид",
   "ДОВЕРИЕ_ПОРТА_СКАРСВОГ": "Вы установили доверие с Рагнаром и Астрид",
@@ -1993,7 +2014,7 @@ function summarizeCurrentRun() {
     inventory: st && Array.isArray(st.inv) ? st.inv.slice() : [],
     storyMoments: st && Array.isArray(st.storyMoments) ? st.storyMoments.map(x => ({...x})) : [],
     characterFates: st && st.characterFates ? JSON.parse(JSON.stringify(st.characterFates)) : {},
-    chapterPageRanges: st ? Object.keys(st.chapterEndChars || {}).reduce((out, no) => { const start=Number((st.chapterStartChars||{})[no]), end=Number(st.chapterEndChars[no]); if (Number.isFinite(start) && Number.isFinite(end)) out[no]={firstPage:Math.floor(start/BOOK_PAGE_CHARS)+1,lastPage:Math.max(Math.floor(start/BOOK_PAGE_CHARS)+1,Math.ceil(end/BOOK_PAGE_CHARS)),characters:Math.max(0,end-start)}; return out; }, {}) : {},
+    chapterPageRanges: st ? Object.keys(st.chapterEndChars || {}).reduce((out, no) => { const start=Number((st.chapterStartChars||{})[no]), end=Number(st.chapterEndChars[no]); if (Number.isFinite(start) && Number.isFinite(end)) out[no]={firstPage:Math.floor(start/CHARS_PER_PAGE)+1,lastPage:Math.max(Math.floor(start/CHARS_PER_PAGE)+1,Math.ceil(end/CHARS_PER_PAGE)),characters:Math.max(0,end-start)}; return out; }, {}) : {},
     endingState: {dead:!!(st && st.dead), hp:st && st.hp, o2:st && st.o2, en:st && st.en, ammo:st && st.ammo}
   };
 }
@@ -2225,12 +2246,12 @@ async function continueSavedGame() {
     // стартовую оценку в символах. Новые сохранения ведут точный счёт с нуля.
     if (!Number.isFinite(Number(st.charsRead)) || Number(st.charsRead) < 0) {
       const legacyPage = Math.max(1, Math.floor(Number(st.currentPage || st.page) || 1));
-      st.charsRead = (legacyPage - 1) * 1600;
+      st.charsRead = (legacyPage - 1) * CHARS_PER_PAGE;
     }
     if (!Number.isFinite(Number(st.pendingCharsRead)) || Number(st.pendingCharsRead) < 0) st.pendingCharsRead = 0;
     st.charsRead = Math.max(0, Math.floor(Number(st.charsRead) || 0));
     st.pendingCharsRead = Math.max(0, Math.floor(Number(st.pendingCharsRead) || 0));
-    st.currentPage = pageFromChars(st.charsRead + st.pendingCharsRead);
+    st.currentPage = pageFromChars(st.charsRead);
     st.pageSchemeVersion = 4;
     st.page = st.currentPage; st.chap = st.currentChapter;
     ensureBookPaginationState();
@@ -2388,7 +2409,7 @@ const save = () => {
         : (st.node ? chapterNumberForState(st) : Number(st.currentChapter != null ? st.currentChapter : st.chap) || 0);
       st.chapterNum = Math.max(0, Number(saveChapter) || 0);
       if (Number.isFinite(Number(st.charsRead)) || Number.isFinite(Number(st.pendingCharsRead))) {
-        st.currentPage = pageFromChars(Math.max(0, Number(st.charsRead) || 0) + Math.max(0, Number(st.pendingCharsRead) || 0));
+        st.currentPage = pageFromChars(st.charsRead);
         st.page = st.currentPage;
       }
       const chatPane = document.querySelector("#chat");
@@ -2703,13 +2724,18 @@ function recoverLegacyTranscript(target) {
 }
 
 const ATTRIBUTION_NAMES = [
-  "Капитан\\s+Брандт", "Брандт", "Боцман\\s+Хольгер", "Хольгер",
-  "Доктор\\s+Ингрид(?:\\s+Вальк)?", "Ингрид(?:\\s+Вальк)?", "Тео",
-  "Кок\\s+Марта", "Марта", "Радист\\s+Свен(?:\\s+Линд)?", "Свен(?:\\s+Линд)?",
-  "Штурман\\s+Олаф", "Олаф", "Хенрик", "Рагнар", "Астрид\\s+Сольберг", "Астрид",
-  "Сигурд(?:\\s+Ларсен)?", "Кнут", "Аэ́рхис", "Аэрхис"
+  "Наставник\\s+Кайлен", "Кайлен(?:а|у|ом|е)?", "Вера[’']Лин", "Куратор\\s+Сорен", "Сорен(?:а|у|ом|е)?",
+  "Капитан\\s+Брандт", "Брандт(?:а|у|ом|е)?", "Боцман\\s+Хольгер", "Хольгер(?:а|у|ом|е)?",
+  "Доктор\\s+Ингрид(?:\\s+Вальк)?", "Ингрид(?:\\s+Вальк)?", "Старший\\s+механик\\s+Тео", "Механик\\s+Тео", "Тео",
+  "Кок\\s+Марта", "Марта(?:ы|е|у)?", "Радист\\s+Свен(?:\\s+Линд)?", "Свен(?:\\s+Линд)?",
+  "Штурман\\s+Олаф", "Олаф(?:а|у|ом|е)?", "Старый\\s+Хенрик", "Хенрик(?:а|у|ом|е)?", "Рагнар(?:а|у|ом|е)?",
+  "Матрос\\s+Йон", "Йон(?:а|у|ом|е)?", "Эрик\\s+Соренсен", "Эрик(?:а|у|ом|е)?", "Соренсен(?:а|у|ом|е)?",
+  "Астрид\\s+Сольберг", "Астрид", "Лиор[’']Саэн", "Сигурд(?:\\s+Ларсен)?", "Кнут", "Лукас",
+  "Командор\\s+Варг", "Варг", "Профессор\\s+Вильгельм\\s+Краус", "Вильгельм\\s+Краус", "Краус",
+  "Ханна\\s+Линдквист", "Ханна", "Инспектор\\s+Хенрикссон", "Хенрикссон", "Мортен\\s+Бекк", "Мортен",
+  "Аэ́рхис(?:а|у|ом|е)?", "Аэрхис(?:а|у|ом|е)?"
 ];
-const ATTRIBUTION_VERBS = "сказал[аи]?|произн[её]с(?:ла|ли)?|ответил[аи]?|спросил[аи]?|добавил[аи]?|прошептал[аи]?|крикнул[аи]?|выдохнул[аи]?|заметил[аи]?|проговорил[аи]?|отозвал(?:ся|ась|ись)|усмехнул(?:ся|ась|ись)|пояснил[аи]?|возразил[аи]?|буркнул[аи]?|пробормотал[аи]?|потребовал[аи]?|уточнил[аи]?|объяснил[аи]?|подхватил[аи]?|проворчал[аи]?|воскликнул[аи]?|вздохнул[аи]?|отметил[аи]?|произнёс|произнес|ответил|ответила|сказал|сказала|говорит|отвечает|произносит|добавляет|шепчет|предупреждает|кричит|выкрикивает|прошептала|крикнула|выдохнула|добавила|заметила|проговорила";
+const ATTRIBUTION_VERBS = "сказал[аи]?|произн[её]с(?:ла|ли)?|ответил[аи]?|спросил[аи]?|спрашивает|добавил[аи]?|прошептал[аи]?|крикнул[аи]?|выдохнул[аи]?|заметил[аи]?|проговорил[аи]?|отозвал(?:ся|ась|ись)|усмехнул(?:ся|ась|ись)|пояснил[аи]?|возразил[аи]?|буркнул[аи]?|пробормотал[аи]?|потребовал[аи]?|уточнил[аи]?|объяснил[аи]?|подхватил[аи]?|проворчал[аи]?|воскликнул[аи]?|вздохнул[аи]?|отметил[аи]?|обращается|продолжает|негодует|произнёс|произнес|ответил|ответила|сказал|сказала|говорит|отвечает|произносит|добавляет|шепчет|предупреждает|кричит|выкрикивает|прошептала|крикнула|выдохнула|добавила|заметила|проговорила";
 const ATTRIBUTION_ADVERBS = "тихо|громко|спокойно|резко|хрипло|коротко|твёрдо|твердо|медленно|устало|негромко|вполголоса|сухо|насмешливо|тревожно|шёпотом|шепотом|сдержанно|едва\\s+слышно";
 const ATTRIBUTION_RE = new RegExp(
   "(?:^|[—,]\\s*)((?:(?:" + ATTRIBUTION_ADVERBS + ")\\s+){0,3}(?:" + ATTRIBUTION_VERBS + ")\\s+)(?:(?:смотритель|проводник)\\s+)?(" + ATTRIBUTION_NAMES.join("|") + ")(?=$|[\\s,.!?;:—])",
@@ -2720,7 +2746,7 @@ function normalizedSpeakerName(name) {
 }
 function isHeroSpeakerName(name) {
   const n = normalizedSpeakerName(name);
-  return n === "аэрхис" || n === "аэ́рхис";
+  return /^аэрхис(?:а|у|ом|е)?$/u.test(n);
 }
 function makeSpeakerName(name) {
   const span = document.createElement("strong");
@@ -2737,31 +2763,34 @@ function inferAttributedSpeaker(value) {
   const match = re.exec(text);
   return match ? String(match[2] || "").trim() : "";
 }
-function appendAttributionText(parent, value) {
-  // Только подсветка имён: весь исходный текст и все тире остаются на своих местах.
+function appendAttributionText(parent, value, speakerName) {
+  // Подсвечиваем только имя говорящего в авторской ремарке, а не все упоминания персонажей.
   const text = String(value == null ? "" : value);
-  const namePattern = new RegExp("(^|[^\\p{L}\\p{N}])(" + ATTRIBUTION_NAMES.join("|") + ")(?![\\p{L}\\p{N}])", "giu");
-  let cursor = 0, heroFound = false, match;
-  while ((match = namePattern.exec(text)) !== null) {
-    const nameStart = match.index + String(match[1] || "").length;
-    const name = match[2];
-    if (nameStart < cursor) continue;
-    if (nameStart > cursor) parent.append(document.createTextNode(text.slice(cursor, nameStart)));
-    parent.append(makeSpeakerName(name));
-    if (isHeroSpeakerName(name)) heroFound = true;
-    cursor = nameStart + name.length;
-    if (namePattern.lastIndex <= match.index) namePattern.lastIndex = match.index + 1;
-  }
-  if (cursor < text.length) parent.append(document.createTextNode(text.slice(cursor)));
-  return heroFound;
+  const speaker = String(speakerName || "").trim();
+  if (!speaker) { parent.append(document.createTextNode(text)); return false; }
+  const escaped = speaker.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const namePattern = new RegExp("(^|[^\\p{L}\\p{N}])(" + escaped + ")(?![\\p{L}\\p{N}])", "iu");
+  const match = namePattern.exec(text);
+  if (!match) { parent.append(document.createTextNode(text)); return false; }
+  const nameStart = match.index + String(match[1] || "").length;
+  const name = match[2];
+  if (nameStart > 0) parent.append(document.createTextNode(text.slice(0, nameStart)));
+  parent.append(makeSpeakerName(name));
+  const after = nameStart + name.length;
+  if (after < text.length) parent.append(document.createTextNode(text.slice(after)));
+  return isHeroSpeakerName(name);
 }
 // Считаем видимый текст реплик и повествования; служебные заголовки и разделители исключены.
-const BOOK_PAGE_CHARS = 1600;
+const CHARS_PER_PAGE = 1600;
 function bookTextCharCount(value) {
-  // Считаем Unicode-символы, включая пробелы и знаки препинания.
-  return Array.from(String(value == null ? "" : value)).length;
+  // Считаем видимые символы: пробелы и пунктуацию включаем, комбинируемые ударения
+  // не считаем отдельной буквой (например, «э» + знак ударения = один символ).
+  const text = String(value == null ? "" : value).normalize("NFC").replace(/\p{M}/gu, "");
+  return Array.from(text).length;
 }
 function draw(m, emptyText = false, options = {}) {
+  const authoredText = String(m && (m.t ?? m.fullText ?? m.text) || "");
+  if (m && m.k === "nar" && isSpeechText(authoredText)) { m.k = "spk"; m.kind = "spk"; }
   const d = document.createElement("div"); d.className = "m " + m.k + (m.bad ? " bad" : "");
   let textNode = null;
   if (m.k === "hd") {
@@ -2771,21 +2800,22 @@ function draw(m, emptyText = false, options = {}) {
   else if (m.k === "sep") { d.textContent = "* * *"; d.setAttribute("role", "separator"); }
   else if (m.k === "spk") {
     const raw = String(m.t ?? m.fullText ?? m.text ?? ""), prefix = raw.match(SPEAKER_PREFIX);
-    // Источник имени — явное поле from или префикс [Имя]: в старой стенограмме.
-    const speaker = (prefix && prefix[1].trim()) || String(m.f || m.speaker || "").trim();
-    if (speaker) {
-      d.append(document.createTextNode("["), makeSpeakerName(speaker), document.createTextNode("]: "));
-      d.dataset.speaker = speaker;
-    }
+    const explicitSpeaker = (prefix && prefix[1].trim()) || String(m.f || m.speaker || "").trim();
+    const attributedSpeaker = inferAttributedSpeaker(raw);
+    const speaker = explicitSpeaker || attributedSpeaker;
+    // Если имя уже извлечено из авторской ремарки, не дублируем его ярлыком в начале строки.
+    const explicitLabel = !!(prefix || (explicitSpeaker && (!attributedSpeaker || normalizedSpeakerName(explicitSpeaker) !== normalizedSpeakerName(attributedSpeaker))));
+    if (explicitLabel && speaker) d.append(document.createTextNode("["), makeSpeakerName(speaker), document.createTextNode("]: "));
+    if (speaker) d.dataset.speaker = speaker;
     let body = prefix ? raw.slice(prefix[0].length) : raw;
     // Убираем ровно один начальный маркер прямой речи: внутренние и вторые тире не трогаем.
     const leadingDash = body.match(SPEECH);
     if (leadingDash) body = body.slice(leadingDash[0].length);
     const dh = el("span", "—\u00a0"); dh.className = "dash"; d.append(dh);
-    let mentionsHero = false;
-    if (!emptyText) mentionsHero = appendAttributionText(d, body);
+    if (!emptyText) appendAttributionText(d, body, attributedSpeaker);
     else { textNode = document.createTextNode(""); d.append(textNode); }
-    if (isHeroSpeakerName(speaker) || mentionsHero || /Аэ́рхис|Аэрхис/iu.test(body)) d.classList.add("hero-speech");
+    if (isHeroSpeakerName(speaker)) d.classList.add("speech-hero", "hero-speech");
+    else d.classList.add("speech-npc");
     if (speaker) d.title = speaker;
   }
   else { if (m.k === "in") d.append(el("b", m.f || st.hero)); textNode = document.createTextNode(emptyText ? "" : m.t); d.append(textNode); }
@@ -2863,8 +2893,8 @@ function chapterDisplayLabel(chapterNo, nodeId) {
 }
 function pageFromChars(chars) {
   const count = Math.max(0, Number(chars) || 0);
-  // Ноль символов — начало первой страницы; 1601-й символ открывает вторую.
-  return Math.max(1, Math.ceil(count / BOOK_PAGE_CHARS));
+  // Страница определяется строго по уже прочитанным символам: floor(chars / 1600) + 1.
+  return Math.floor(count / CHARS_PER_PAGE) + 1;
 }
 function nodeNarrativeCharCount(node) {
   if (!node) return 0;
@@ -2903,6 +2933,55 @@ function storyRouteOptions(node) {
 // could freeze the UI while status() recalculated the book length.
 const longestStoryMemo = new Map();
 let authoredBookTotalPagesMemo = null;
+// Базовые оценки получены по текущим полным материалам: главы 1–4 в среднем
+// содержат около 12,5 тыс. символов всех сцен и веток; Пролог — около 23,4 тыс.
+// По мере загрузки модулей оценки заменяются фактическими объёмами этих глав.
+const BOOK_MAIN_CHAPTER_COUNT = 19;
+const DEFAULT_EXPANDED_CHAPTER_CHARS = 12496;
+const DEFAULT_PROLOGUE_CHARS = 23323;
+function loadedChapterNarrativeChars(chapterKey) {
+  let total = 0;
+  Object.entries(STORY_DATA.nodes || {}).forEach(([nodeId, node]) => {
+    const mapped = STORY_NODE_CHAPTER[nodeId];
+    const actualChapter = nodeChapterNo(node, nodeId);
+    const matches = chapterKey === "prologue"
+      ? mapped === "prologue" || isPrologueNodeId(nodeId) || actualChapter === 0
+      : Number(mapped) === Number(chapterKey) || actualChapter === Number(chapterKey);
+    if (matches) total += nodeNarrativeCharCount(node);
+  });
+  return total;
+}
+function recalculateAuthoredBookTotalPages() {
+  const loadedKeys = new Set([...loadedStoryChapters].map(key => String(key)));
+  const loadedMain = [...loadedKeys].filter(key => /^\d+$/.test(key) && Number(key) >= 1 && Number(key) <= BOOK_MAIN_CHAPTER_COUNT);
+  const partManifest = STORY_DATA.meta && STORY_DATA.meta.chapterPartNodeManifest
+    ? STORY_DATA.meta.chapterPartNodeManifest
+    : {};
+  const isPartialChapter = key => {
+    const manifest = partManifest[String(key)];
+    return !!(manifest && typeof manifest === "object" && manifest.complete === false);
+  };
+  // Частично доставленный модуль не считаем целой главой: иначе короткая первая
+  // часть искусственно уменьшила бы средний объём и общий размер всей книги.
+  const completeMain = loadedMain.filter(key => !isPartialChapter(key));
+  const completeVolumes = completeMain.map(key => loadedChapterNarrativeChars(key));
+  const completeMainChars = completeVolumes.reduce((sum, value) => sum + value, 0);
+  const allLoadedMainChars = loadedMain.reduce((sum, key) => sum + loadedChapterNarrativeChars(key), 0);
+  const avgExpandedChars = completeVolumes.length
+    ? completeMainChars / completeVolumes.length
+    : DEFAULT_EXPANDED_CHAPTER_CHARS;
+  const prologueLoaded = loadedKeys.has("prologue");
+  const prologueChars = prologueLoaded ? loadedChapterNarrativeChars("prologue") : DEFAULT_PROLOGUE_CHARS;
+  // В остаток входят как ещё не загруженные главы, так и загруженные пока не полностью.
+  const notCompleteMainCount = Math.max(0, BOOK_MAIN_CHAPTER_COUNT - completeMain.length);
+  const estimatedTotalChars = prologueChars + completeMainChars + notCompleteMainCount * avgExpandedChars;
+  const loadedActualChars = (prologueLoaded ? prologueChars : 0) + allLoadedMainChars;
+  const loadedPages = Math.max(1, Math.ceil(loadedActualChars / CHARS_PER_PAGE));
+  const estimatedTotalPages = Math.max(1, Math.ceil(estimatedTotalChars / CHARS_PER_PAGE));
+  authoredBookTotalPagesMemo = Math.max(loadedPages, estimatedTotalPages);
+  if (STORY_DATA.meta) STORY_DATA.meta.authoredBookPages = authoredBookTotalPagesMemo;
+  return authoredBookTotalPagesMemo;
+}
 function longestStoryCharsFrom(nodeId, visiting = new Set()) {
   const node = STORY_DATA.nodes[nodeId];
   if (!node || visiting.has(nodeId)) return 0;
@@ -2917,7 +2996,9 @@ function longestStoryCharsFrom(nodeId, visiting = new Set()) {
   return result;
 }
 function authoredBookTotalPages() {
-  return Math.max(1, Number(STORY_DATA.meta.authoredBookPages) || 74);
+  return Number.isFinite(Number(authoredBookTotalPagesMemo)) && Number(authoredBookTotalPagesMemo) > 0
+    ? Number(authoredBookTotalPagesMemo)
+    : recalculateAuthoredBookTotalPages();
 }
 const chapterPathMemo = new Map();
 function chapterPathCharRange(nodeId, chapterNo, visiting = new Set()) {
@@ -2974,11 +3055,11 @@ function ensureBookPaginationState(target = st) {
       const start = Number(target.chapterStartChars[no]);
       const end = Number(target.chapterEndChars[no]);
       if (Number.isFinite(start) && Number.isFinite(end)) {
-        const first = Math.floor(Math.max(0,start) / BOOK_PAGE_CHARS) + 1;
-        const last = Math.max(first, Math.ceil(Math.max(start,end) / BOOK_PAGE_CHARS));
+        const first = Math.floor(Math.max(0,start) / CHARS_PER_PAGE) + 1;
+        const last = Math.max(first, Math.ceil(Math.max(start,end) / CHARS_PER_PAGE));
         item.pages = first + "–" + last;
       } else if (Number.isFinite(start)) {
-        item.pages = Math.floor(Math.max(0,start) / BOOK_PAGE_CHARS) + 1 + "+";
+        item.pages = Math.floor(Math.max(0,start) / CHARS_PER_PAGE) + 1 + "+";
       } else {
         item.pages = "автоматически";
       }
@@ -2992,8 +3073,8 @@ function chapterPageRange(chapterNo) {
   const start = Number(st.chapterStartChars[key]);
   const end = Number(st.chapterEndChars[key]);
   if (!Number.isFinite(start) || !Number.isFinite(end)) return null;
-  const firstPage = Math.floor(Math.max(0, start) / BOOK_PAGE_CHARS) + 1;
-  const lastPage = Math.max(firstPage, Math.ceil(Math.max(start, end) / BOOK_PAGE_CHARS));
+  const firstPage = Math.floor(Math.max(0, start) / CHARS_PER_PAGE) + 1;
+  const lastPage = Math.max(firstPage, Math.ceil(Math.max(start, end) / CHARS_PER_PAGE));
   return {firstPage,lastPage,characters:Math.max(0,end-start),startChars:start,endChars:end};
 }
 function chapterHeaderPageText(chapterNo) {
@@ -3001,7 +3082,7 @@ function chapterHeaderPageText(chapterNo) {
   if (range) return range.firstPage + "–" + range.lastPage;
   ensureBookPaginationState();
   const start = Number(st.chapterStartChars[String(chapterNo)]);
-  if (Number.isFinite(start)) return Math.floor(Math.max(0,start) / BOOK_PAGE_CHARS) + 1 + "+";
+  if (Number.isFinite(start)) return Math.floor(Math.max(0,start) / CHARS_PER_PAGE) + 1 + "+";
   return "автоматически";
 }
 function chapterPageSummary(chapterNo) {
@@ -3012,18 +3093,18 @@ function chapterPageSummary(chapterNo) {
     const start = Number(st.chapterStartChars[String(chapterNo)]);
     if (Number.isFinite(start)) {
       const read = Math.max(0, Number(st.charsRead || 0) + Number(st.pendingCharsRead || 0) - start);
-      const startPage = Math.floor(Math.max(0,start) / BOOK_PAGE_CHARS) + 1;
+      const startPage = Math.floor(Math.max(0,start) / CHARS_PER_PAGE) + 1;
       const projection = chapterProjection(chapterNo);
-      const minEnd = Math.max(startPage, Math.ceil((start + projection.min) / BOOK_PAGE_CHARS));
-      const maxEnd = Math.max(minEnd, Math.ceil((start + projection.max) / BOOK_PAGE_CHARS));
+      const minEnd = Math.max(startPage, Math.ceil((start + projection.min) / CHARS_PER_PAGE));
+      const maxEnd = Math.max(minEnd, Math.ceil((start + projection.max) / CHARS_PER_PAGE));
       const forecast = minEnd === maxEnd ? (startPage + "–" + maxEnd) : (startPage + "–" + minEnd + " / " + startPage + "–" + maxEnd);
       return "Текущая · прогноз стр. " + forecast + " · прочитано " + read.toLocaleString("ru-RU") + " знаков";
     }
   }
   const projection = chapterProjection(chapterNo);
   if (projection.max > 0) {
-    const minPages = Math.max(1, Math.ceil(projection.min / BOOK_PAGE_CHARS));
-    const maxPages = Math.max(1, Math.ceil(projection.max / BOOK_PAGE_CHARS));
+    const minPages = Math.max(1, Math.ceil(projection.min / CHARS_PER_PAGE));
+    const maxPages = Math.max(1, Math.ceil(projection.max / CHARS_PER_PAGE));
     const volume = minPages === maxPages ? minPages + " стр." : minPages + "–" + maxPages + " стр.";
     return "Объём написанного текста: " + volume + " · номера зависят от ветки";
   }
@@ -3059,7 +3140,7 @@ function pgInfo() {
   const M = STORY_DATA.meta;
   const n = STORY_DATA.nodes[st.node] || {};
   const chapterNo = chapterNumberForState(st);
-  return { page: pageFromChars(Number(st.charsRead || 0) + Number(st.pendingCharsRead || 0)), chapterNo, c: M.chapters.find(x => Number(x.no) === chapterNo) || null, total: authoredBookTotalPages() };
+  return { page: pageFromChars(st.charsRead), chapterNo, c: M.chapters.find(x => Number(x.no) === chapterNo) || null, total: authoredBookTotalPages() };
 }
 function pgTxt() {
   if (!st) return "";
@@ -3205,6 +3286,7 @@ function status() {
   $("#am").textContent = LB.short.ammo + " " + st.ammo;
   const page = pgInfo();
   $("#pg").textContent = chapterDisplayLabel(page.chapterNo, st.node) + " · Стр. " + page.page + " / " + page.total;
+  $("#pg").title = "Общий объём — оценка: точный текст загруженных глав плюс средний объём ещё не загруженных глав. Значение уточняется при загрузке модулей.";
   $("#pg").style.setProperty("--p", Math.min(100, page.page / Math.max(1, page.total) * 100) + "%");
   $("#ic").textContent = st.inv.length + "/" + MAXINV;
   updateJournalBadge();
@@ -3669,7 +3751,7 @@ async function enter(id) {
   st.currentChapter = nextChapterNo; st.chap = st.currentChapter;
   if (!Number.isFinite(Number(st.chapterStartChars[String(nextChapterNo)]))) st.chapterStartChars[String(nextChapterNo)] = Math.max(0, Number(st.charsRead) || 0);
   // Физическая страница определяется фактически показанными символами, а не номером сцены.
-  st.currentPage = pageFromChars(Number(st.charsRead || 0) + Number(st.pendingCharsRead || 0)); st.page = st.currentPage;
+  st.currentPage = pageFromChars(st.charsRead); st.page = st.currentPage;
   st.stats.steps++; st.waitDone = false; st.waitWasSkipped = false; const o = n.onEnter || {};
   o.hp && res("hp", o.hp); o.o2 && res("o2", o.o2); o.energy && res("en", o.energy); o.ammo && res("ammo", o.ammo);
   applyStoryEffects(o, "node-enter");
@@ -5322,7 +5404,7 @@ function openJournal() {
     notifyButton.onclick = () => requestStoryNotifications();
     mainPanel.append(notifyButton);
     mainPanel.append(el("p", "Сюжетные ожидания и входящие сообщения используют абсолютные дедлайны и сохраняются при закрытии: можно ответить сразу или позже. Если страница остаётся запущенной, браузер может показать системное уведомление; если приложение было закрыто, просроченное сообщение появится во входящих при следующем запуске. Гарантированная доставка push при полностью закрытом Telegram Mini App требует серверного планировщика, базы данных и отправки сообщения через Telegram Bot API."));
-    mainPanel.append(el("h3", "Оглавление · 1600 символов = 1 страница · до " + authoredBookTotalPages() + " стр. написанного текста"));
+    mainPanel.append(el("h3", "Оглавление · 1 600 символов = 1 страница · ориентировочно " + authoredBookTotalPages() + " стр. всей книги"));
     const legend = el("p", "✓ Пройдено · ▶ Текущая глава · 🔒 Впереди"); legend.className = "toc-legend"; mainPanel.append(legend);
     const toc = el("div", ""); toc.className = "toc";
     const current = Math.max(0, Math.min(20, chapterNumberForState(st)));
