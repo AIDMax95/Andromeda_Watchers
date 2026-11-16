@@ -4683,7 +4683,7 @@ function openChronologyFromSplash() {
 /*
  * Любой модуль главы может добавлять темы:
  * window.CHAPTER_CALLS = window.CHAPTER_CALLS || {};
- * window.CHAPTER_CALLS["brandt"] = [{ id, chapter, title, reqClue, messages,
+ * window.CHAPTER_CALLS["brandt"] = [{ id, chapter, title, reqClue, reqItem, reqFlag, messages,
  *   trustDelta, addFlags, addClue, surveillance }];
  *
  * Если chapter не указан, загрузчик закрепляет тему за модулем, который её добавил.
@@ -4745,13 +4745,29 @@ function contactHasClueRequirement(reqClue) {
   });
 }
 
+function contactTopicRequirementsMet(topic) {
+  if (!topic || typeof topic !== "object") return false;
+  const checks = [];
+  if (topic.reqClue) checks.push(contactHasClueRequirement(topic.reqClue));
+  if (topic.reqFlag) {
+    const requiredFlags = Array.isArray(topic.reqFlag) ? topic.reqFlag : [topic.reqFlag];
+    checks.push(requiredFlags.some(flag => (st.flags || []).some(found => String(found) === String(flag))));
+  }
+  if (topic.reqItem) {
+    const requiredItems = Array.isArray(topic.reqItem) ? topic.reqItem : [topic.reqItem];
+    checks.push(requiredItems.some(item => (st.inv || []).some(found => String(found) === String(item))));
+  }
+  // Указанные типы требований — альтернативные способы открыть тему.
+  return checks.length ? checks.some(Boolean) : true;
+}
+
 function contactTopicsFor(contactId, chapterNo = contactChapterNo()) {
   const registry = window.CHAPTER_CALLS || {};
   const entries = Array.isArray(registry[contactId]) ? registry[contactId] : [];
   return entries.filter(topic => {
     if (!topic || typeof topic !== "object" || !topic.id || !topic.title) return false;
     const topicChapter = Number(topic.chapter || topic.chapterNo || topic._chapter || chapterNo);
-    return topicChapter === Number(chapterNo) && contactHasClueRequirement(topic.reqClue);
+    return topicChapter === Number(chapterNo) && contactTopicRequirementsMet(topic);
   });
 }
 
@@ -4855,7 +4871,7 @@ function playContactTopic(contactId, topic) {
     openContactTopics(contactId);
     return;
   }
-  if (!contactHasClueRequirement(topic.reqClue)) {
+  if (!contactTopicRequirementsMet(topic)) {
     modal(m => {
       m.append(el("h3", "ТЕМА ЗАКРЫТА"));
       m.append(el("p", "Для этого разговора нужна дополнительная улика из Журнала."));
