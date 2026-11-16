@@ -499,7 +499,7 @@ body {
 
 <div id="loader" class="scr on"><div class="ld-t" id="ldT"></div><div class="ld-bar"><i id="ldbar"></i></div><div id="ldlog"></div><div class="cred" id="ldA"></div></div>
 <div id="splash" class="scr"><div class="cv"></div><div class="shade"></div><canvas id="snow"></canvas><div class="in"><div class="cover-title"><div class="kick">АВТОРСКАЯ КНИГА-ИГРА</div><h1 class="ttl" id="spT" aria-label="НАБЛЮДАТЕЛИ АНДРОМЕДЫ"><span class="title-line" id="spT1">НАБЛЮДАТЕЛИ</span><span class="title-line" id="spT2">АНДРОМЕДЫ</span></h1></div><div class="sub" id="spS"></div><div class="blurb" id="spB"></div><div class="cred" id="spF"></div><button id="spGo" class="big">НАЧАТЬ ИГРУ</button><button id="spCont" class="big" style="display:none;background:var(--pn);color:var(--tx);border:1px solid var(--ln)">ПРОДОЛЖИТЬ</button><button id="spChronicle" class="big" hidden style="background:linear-gradient(105deg,#182641,#241b3c);color:#e6e9ff;border:1px solid #8e7ac8">⧖ ХРОНОЛОГИЯ (Т2)</button><div class="cred" id="spC"></div><div class="cred" id="spA"></div></div></div>
-<div id="prologue" class="scr"><div class="in"><div class="kick">ПРОЛОГ · СТР. 1–4</div><div id="pr"></div><button id="prGo" class="big pp">ВЫБРАТЬ ПУТЬ</button></div></div>
+<div id="prologue" class="scr"><div class="in"><div class="kick">ПРОЛОГ · ТЕНЬ ЗА СТЕКЛОМ АРХИВА</div><div id="pr"></div><button id="prGo" class="big pp">ВЫБРАТЬ ПУТЬ</button></div></div>
 <div id="setup" class="scr">
  <h1>ВЫБОР ПУТИ</h1><div style="color:var(--dim)">Вы Лиор’Саэн, тихий спутник, чей свет ведёт Аэ́рхиса. Выберите путь Наблюдателя.</div><div class="cred" id="credA"></div><div class="cred" id="ucA"></div>
  <h2>Путь Наблюдателя</h2><div id="heroes"></div>
@@ -551,7 +551,7 @@ window.STORY_DATA = {
     facts: "Авторская книга-игра · 19 глав и 4 варианта эпилога",
     totalPages: 377, // только верхняя граница для миграции старых сохранений; интерфейс считает объём по фактическому тексту
     chapters: [
-      { no: 21, title: "Пролог · Тень за стеклом архива", pages: "динамически", ready: true, sum: "Станция «Внешний Предел», тайная слежка за памятью Лиор’Саэна, диверсия в навигационном контуре и подготовка к полёту на Землю." },
+      { no: 0, title: "ПРОЛОГ · ТЕНЬ ЗА СТЕКЛОМ АРХИВА", pages: "динамически", ready: true, sum: "Станция «Внешний Предел», тайная слежка за памятью Лиор’Саэна, диверсия в навигационном контуре и подготовка к полёту на Землю." },
       { no: 1, title: "Ледяная бездна", pages: "динамически", ready: true, sum: "Падение из Андромеды, ледяной океан, спасение экипажем «Северного горизонта» и первые часы в судовом лазарете." },
       { no: 2, title: "Люди из океана", pages: "динамически", ready: true, sum: "Первые дни «Северного горизонта» в открытом море: знакомство с экипажем, выбор — открыть правду или скрыть природу Лиор’Саэна, неизвестный беспилотник и два исхода обнаружения." },
       { no: 3, title: "Сердце шторма", pages: "динамически", ready: true, sum: "Шторм в открытом море, авария крио-стабилизатора, заклинивший гребной вал и спасение экипажа «Северного горизонта» с разными последствиями." },
@@ -654,7 +654,7 @@ window.STORY_DATA = {
   nodes: {}
  };
 const STORY_DATA = window.STORY_DATA;
-const STORY_NODE_CHAPTER = Object.freeze({"p01_01":"prologue","p01_02":"prologue","p01_03":"prologue","p01_03a":"prologue","p01_03b":"prologue","p01_03c":"prologue","p01_03d":"prologue","p01_04":"prologue","p01_05":"prologue","p01_06":"prologue","p01_07":"prologue","p01_08":"prologue","p01_09":"prologue","c01_01":1,"c01_02":1,"c01_03":1,"c01_03a":1,"c01_03b":1,"c01_03c":1,"c02_01":2,"c02_02":2,"c02_02a":2,"c02_02b":2,"c02_02c_forgive":2,"c02_02c_expose":2,"c02_02c_silent":2,"c02_03":2,"c02_04_hidden":2,"c02_04_detected":2,"c02_04":2,"c02_05":2,"c02_06":2,"c03_01":3,"c03_01a":3,"c03_02":3,"c03_03_clean":3,"c03_03_hard":3,"c03_04":3,"c04_01":4,"c04_02":4,"c04_03":4,"c04_04_clean":4,"c04_04_clash":4,"c04_04":4,"c05_01":5,"c05_02":5,"c05_03_quiet":5,"c05_03_alarm":5,"c05_04":5,"c06_01":6,"c06_02":6,"c06_03":6,"c06_04_safe":6,"c06_04_spotted":6,"c07_01":7,"c07_02":7,"c07_03":7,"c07_04_clean":7,"c07_04_chaos":7,"c07_05":7,"c08_01":8,"c08_02":8,"c08_03":8,"c08_04_escape":8,"c08_04_ambush":8,"c08_05":8,"c09_01":9,"c09_02":9,"c09_03_clean":9,"c09_03_hard":9,"c09_04":9,"c10_01":10,"c10_02":10,"c10_03":10,"c11_01":11,"c11_02":11,"c11_03":11,"c11_04_clean":11,"c11_04_spotted":11,"c12_01":12,"c12_02":12,"c12_03_saved":12,"c12_03_overload":12,"c12_04":12,"c13_01":13,"c13_02":13,"c13_03":13,"c13_04_clean":13,"c13_04_hard":13,"c14_01":14,"c14_02":14,"c14_03":14,"c14_04_clean":14,"c14_04_hard":14,"c15_01":15,"c15_02":15,"c15_03":15,"c16_01":16,"c16_02":16,"c16_03":16,"c16_04_clean":16,"c16_04_hard":16,"c17_01":17,"c17_02":17,"c17_03_clean":17,"c17_03_hard":17,"c18_01":18,"c18_02":18,"c18_03_clean":18,"c18_03_hard":18,"c19_01":19,"c19_02_earth":19,"c19_02_bridge":19,"c19_02_stars":19,"c19_02_guardian":19,"end_01":19,"end_02":19,"end_03":19,"end_04":19,"c01_03d":1,"c01_03e":1,"c01_03f_calm":1,"c01_03f_alarm":1});
+const STORY_NODE_CHAPTER = Object.freeze({"p01_01":"prologue","p01_02":"prologue","p01_03":"prologue","p01_03a":"prologue","p01_03b":"prologue","p01_03c":"prologue","p01_03d":"prologue","p01_04":"prologue","p01_05":"prologue","p01_06":"prologue","p01_07":"prologue","p01_08":"prologue","p01_09":"prologue","c01_01":1,"c01_02":1,"c01_03":1,"c01_03a":1,"c01_03b":1,"c01_03c":1,"c02_01":2,"c02_02":2,"c02_02a":2,"c02_02b":2,"c02_02c_forgive":2,"c02_02c_expose":2,"c02_02c_silent":2,"c02_03":2,"c02_04_hidden":2,"c02_04_detected":2,"c02_04":2,"c02_05":2,"c02_06":2,"c03_01":3,"c03_01a":3,"c03_02":3,"c03_03_clean":3,"c03_03_hard":3,"c03_04":3,"c04_01":4,"c04_01a":4,"c04_02":4,"c04_03":4,"c04_04_clean":4,"c04_04_clash":4,"c04_04":4,"c05_01":5,"c05_02":5,"c05_03_quiet":5,"c05_03_alarm":5,"c05_04":5,"c06_01":6,"c06_02":6,"c06_03":6,"c06_04_safe":6,"c06_04_spotted":6,"c07_01":7,"c07_02":7,"c07_03":7,"c07_04_clean":7,"c07_04_chaos":7,"c07_05":7,"c08_01":8,"c08_02":8,"c08_03":8,"c08_04_escape":8,"c08_04_ambush":8,"c08_05":8,"c09_01":9,"c09_02":9,"c09_03_clean":9,"c09_03_hard":9,"c09_04":9,"c10_01":10,"c10_02":10,"c10_03":10,"c11_01":11,"c11_02":11,"c11_03":11,"c11_04_clean":11,"c11_04_spotted":11,"c12_01":12,"c12_02":12,"c12_03_saved":12,"c12_03_overload":12,"c12_04":12,"c13_01":13,"c13_02":13,"c13_03":13,"c13_04_clean":13,"c13_04_hard":13,"c14_01":14,"c14_02":14,"c14_03":14,"c14_04_clean":14,"c14_04_hard":14,"c15_01":15,"c15_02":15,"c15_03":15,"c16_01":16,"c16_02":16,"c16_03":16,"c16_04_clean":16,"c16_04_hard":16,"c17_01":17,"c17_02":17,"c17_03_clean":17,"c17_03_hard":17,"c18_01":18,"c18_02":18,"c18_03_clean":18,"c18_03_hard":18,"c19_01":19,"c19_02_earth":19,"c19_02_bridge":19,"c19_02_stars":19,"c19_02_guardian":19,"end_01":19,"end_02":19,"end_03":19,"end_04":19,"c01_03d":1,"c01_03e":1,"c01_03f_calm":1,"c01_03f_alarm":1});
 const STORY_CHAPTER_PATHS = Object.freeze({1:"./chapters/ch01.js",2:"./chapters/ch02.js",3:"./chapters/ch03.js",4:"./chapters/ch04.js",5:"./chapters/ch05.js",6:"./chapters/ch06.js",7:"./chapters/ch07.js",8:"./chapters/ch08.js",9:"./chapters/ch09.js",10:"./chapters/ch10.js",11:"./chapters/ch11.js",12:"./chapters/ch12.js",13:"./chapters/ch13.js",14:"./chapters/ch14.js",15:"./chapters/ch15.js",16:"./chapters/ch16.js",17:"./chapters/ch17.js",18:"./chapters/ch18.js",19:"./chapters/ch19.js",prologue:"./chapters/prologue.js"});
 
 const STORY_CHAPTER_PROJECTIONS = Object.freeze({"1":{"min":7361,"max":7399},"2":{"min":6351,"max":7315},"3":{"min":6858,"max":7236},"4":{"min":6530,"max":6857},"5":{"min":7123,"max":7371},"6":{"min":6545,"max":7108},"7":{"min":7608,"max":7705},"8":{"min":7514,"max":7994},"9":{"min":5240,"max":6182},"10":{"min":7322,"max":7387},"11":{"min":4426,"max":4715},"12":{"min":6840,"max":6976},"13":{"min":5628,"max":6306},"14":{"min":5159,"max":5241},"15":{"min":4716,"max":4732},"16":{"min":4887,"max":4961},"17":{"min":3014,"max":3265},"18":{"min":4247,"max":4385},"19":{"min":2852,"max":3022},"20":{"min":695,"max":1055}});
@@ -730,10 +730,15 @@ async function loadChaptersForState(targetState) {
     addNode(entry && entry.snapshot && entry.snapshot.node);
   });
   if (!ids.size) {
-    const current = Math.max(1, Number(targetState.currentChapter || targetState.chap) || 1);
-    Object.keys(STORY_NODE_CHAPTER).forEach(id => { if (STORY_NODE_CHAPTER[id] <= current) ids.add(id); });
+    const current = chapterNumberForState(targetState);
+    Object.keys(STORY_NODE_CHAPTER).forEach(id => {
+      const key = STORY_NODE_CHAPTER[id];
+      const number = key === "prologue" ? 0 : Number(key);
+      if (Number.isFinite(number) && number <= current) ids.add(id);
+    });
   }
-  const chapters = [...new Set([...ids].map(chapterForNodeId).filter(Boolean))].sort((a,b)=>a-b);
+  const chapters = [...new Set([...ids].map(chapterForNodeId).filter(Boolean))]
+    .sort((a,b) => (a === "prologue" ? 0 : Number(a)) - (b === "prologue" ? 0 : Number(b)));
   await Promise.all(chapters.map(loadChapter));
 }
 window.loadChapter = loadChapter;
@@ -1969,7 +1974,7 @@ function summarizeCurrentRun() {
     visitedNodes: (st && Array.isArray(st.visitedNodes) ? st.visitedNodes : []).slice(),
     timelineId: Number(st && (st.activeTimelineId || st.timelineId)) || 1,
     node: st && st.node || "",
-    chapter: Number(st && (st.currentChapter || st.chap)) || 1,
+    chapter: chapterNumberForState(st),
     page: Number(st && st.currentPage) || 1,
     charsRead: Number(st && st.charsRead) || 0,
     chapterStartChars: st && st.chapterStartChars ? JSON.parse(JSON.stringify(st.chapterStartChars)) : {},
@@ -2115,7 +2120,7 @@ $("#go").onclick = () => {
   } else {
     metaProgress.activeTimelineId = 1;
   }
-  st = { timelineId: startingTimelineId, activeTimelineId: startingTimelineId, timelines: previousArchive, hero: h.name, arch: sel === "custom" ? "Свой персонаж" : (h.path || h.name), stats: { steps: 0, choices: 0, skills: 0, skillList: [], dmg: 0, ammo: 0, o2: 0, en: 0 }, skills: [...h.skills], mode: cfg.mode, sound: cfg.sound, hp: 20, o2: 100, en: 100, ammo: h.ammo, inv: [...h.items], itemBuffs: [], itemUseLog: {}, equipment: {}, flags: [], journalSeen: [], inspectedInspects: [], clues: [], discussedCalls: [], callHistory: [], surveillanceNotes: [], dossiers: ["aerkhis", "liorsaen"], chat: [], queue: [], pend: [], node: null, currentChapter: 1, shownChapterHeader: 0, currentPage: 1, charsRead: 0, pendingCharsRead: 0, chapterStartChars: {"1":0}, chapterEndChars: {}, pageSchemeVersion: 4, temporalHistoryVersion: 3, chap: 1, page: 1, waitUntil: 0, waitMode: null, waitDone: false, waitWasSkipped: false, activeResponseDeadline: null, incomingCallsDelivered: [], notificationsEnabled: false, decisionHistory: [], decisionSequence: 0, storyMoments: [], pendingOutcome: null, realtimeSchedule: [], realtimeInbox: [], realtimeDelivered: [], storyVars: {}, relationships: {}, characterFates: {}, dead: false };
+  st = { timelineId: startingTimelineId, activeTimelineId: startingTimelineId, timelines: previousArchive, hero: h.name, arch: sel === "custom" ? "Свой персонаж" : (h.path || h.name), stats: { steps: 0, choices: 0, skills: 0, skillList: [], dmg: 0, ammo: 0, o2: 0, en: 0 }, skills: [...h.skills], mode: cfg.mode, sound: cfg.sound, hp: 20, o2: 100, en: 100, ammo: h.ammo, inv: [...h.items], itemBuffs: [], itemUseLog: {}, equipment: {}, flags: [], journalSeen: [], inspectedInspects: [], clues: [], discussedCalls: [], callHistory: [], surveillanceNotes: [], dossiers: ["aerkhis", "liorsaen"], chat: [], queue: [], pend: [], node: null, currentChapter: 0, shownChapterHeader: -1, currentPage: 1, charsRead: 0, pendingCharsRead: 0, chapterStartChars: {"0":0}, chapterEndChars: {}, pageSchemeVersion: 4, temporalHistoryVersion: 3, chap: 0, page: 1, waitUntil: 0, waitMode: null, waitDone: false, waitWasSkipped: false, activeResponseDeadline: null, incomingCallsDelivered: [], notificationsEnabled: false, decisionHistory: [], decisionSequence: 0, storyMoments: [], pendingOutcome: null, realtimeSchedule: [], realtimeInbox: [], realtimeDelivered: [], storyVars: {}, relationships: {}, characterFates: {}, dead: false };
   applyT2Carryover(st);
   $("#chat").innerHTML = ""; show("game"); status(); enter(STORY_DATA.meta.start);
   // Если история уже завершалась, новый старт — это новая временная линия.
@@ -2170,12 +2175,14 @@ $("#cont").onclick = async () => {
   // но никогда не перезаписываем уже сохранённый currentPage.
   {
     const cn = STORY_DATA.nodes[st.node] || {};
-    const idMatch = String(st.node || "").match(/^c(\d+)_/);
-    const nodeChapter = (cn.chapter && Number(cn.chapter.no)) || (idMatch ? Number(idMatch[1]) : 0) || Number(st.chap) || 1;
+    const nodeIsPrologue = isPrologueNodeId(st.node);
+    const nodeChapter = nodeIsPrologue ? 0 : (nodeChapterNo(cn, st.node) || Number(st.chap) || 1);
     const chapterMeta = STORY_DATA.meta.chapters.find(x => x.no === nodeChapter);
     const baseMatch = chapterMeta && String(chapterMeta.pages).match(/\d+/);
     const nodePageMatch = cn.page && String(cn.page).match(/\d+/);
-    if (!Number.isFinite(Number(st.currentChapter)) || Number(st.currentChapter) < 1) st.currentChapter = nodeChapter;
+    const isPrologueState = nodeIsPrologue || (!st.node && (Number(st.currentChapter) === 0 || Number(st.chap) === 0));
+    if (isPrologueState) { st.currentChapter = 0; st.chap = 0; }
+    else if (!Number.isFinite(Number(st.currentChapter)) || Number(st.currentChapter) < 1) st.currentChapter = nodeChapter;
     let restoredPage = Number(st.currentPage);
     if (!Number.isFinite(restoredPage) || restoredPage < 1) restoredPage = Number(st.page);
     if (!Number.isFinite(restoredPage) || restoredPage < 1) restoredPage = Number((nodePageMatch && nodePageMatch[0]) || (baseMatch && baseMatch[0]) || 1);
@@ -2183,7 +2190,19 @@ $("#cont").onclick = async () => {
     // Сдвигаем сохранённую страницу на 4 назад; Главы 2+ не затрагиваем.
     if (Number(st.pageSchemeVersion || 0) < 2 && nodeChapter === 1 && restoredPage >= 5) restoredPage -= 4;
     st.currentPage = Math.max(1, Math.min(STORY_DATA.meta.totalPages || 377, Math.floor(restoredPage)));
-    st.currentChapter = Math.max(1, Math.floor(Number(st.currentChapter)));
+    st.currentChapter = Math.max(isPrologueState ? 0 : 1, Math.floor(Number(st.currentChapter)));
+    st.chap = st.currentChapter;
+    if (isPrologueState) {
+      [st.chapterStartChars, st.chapterEndChars].forEach(map => {
+        if (map && Object.prototype.hasOwnProperty.call(map, "21")) {
+          if (!Object.prototype.hasOwnProperty.call(map, "0")) map["0"] = map["21"];
+          delete map["21"];
+        }
+      });
+      (st.chat || []).forEach(item => { if (item && item.k === "hd" && Number(item.no) === 21) item.no = 0; });
+      (st.queue || []).forEach(item => { if (item && item.k === "hd" && Number(item.no) === 21) item.no = 0; });
+      if (Number(st.shownChapterHeader) === 21) st.shownChapterHeader = 0;
+    }
     st.pageSchemeVersion = 2;
     // Переход со старого счётчика кликов: точное число символов для старых
     // сохранений восстановить нельзя, поэтому сохраняем прежний прогресс как
@@ -2208,18 +2227,20 @@ $("#cont").onclick = async () => {
     st.chat = (Array.isArray(st.chat) ? st.chat : []).filter(m => {
       if (!m || m.k !== "hd") return true;
       const no = Number(m.no);
-      if (!Number.isFinite(no) || no < 1) return true;
+      if (!Number.isFinite(no) || no < 0) return true;
       if (seenChapterHeaders.has(no)) return false;
       seenChapterHeaders.add(no);
       return true;
     });
     const currentNode = STORY_DATA.nodes[st.node] || {};
-    const currentChapterNo = st.node ? nodeChapterNo(currentNode, st.node) : 0;
+    const currentChapterNo = st.node ? nodeChapterNo(currentNode, st.node) : chapterNumberForState(st);
     const savedHeaderNo = Number(st.shownChapterHeader);
-    if (!Number.isFinite(savedHeaderNo) || savedHeaderNo < 0) {
-      st.shownChapterHeader = currentChapterNo || 0;
+    if (isPrologueNodeId(st.node)) {
+      st.shownChapterHeader = seenChapterHeaders.has(0) ? 0 : -1;
+    } else if (!Number.isFinite(savedHeaderNo)) {
+      st.shownChapterHeader = st.node ? currentChapterNo : -1;
     } else {
-      st.shownChapterHeader = Math.max(0, Math.floor(savedHeaderNo));
+      st.shownChapterHeader = Math.max(-1, Math.floor(savedHeaderNo));
       if (currentChapterNo > 0 && (seenChapterHeaders.has(currentChapterNo) || st.node)) {
         st.shownChapterHeader = Math.max(st.shownChapterHeader, currentChapterNo);
       }
@@ -2230,7 +2251,7 @@ $("#cont").onclick = async () => {
       st.queue = st.queue.filter(q => {
         if (!q || q.k !== "hd") return true;
         const no = Number(q.no);
-        if (!Number.isFinite(no) || no < 1) return true;
+        if (!Number.isFinite(no) || no < 0) return true;
         if (queuedChapterHeaders.has(no)) return false;
         queuedChapterHeaders.add(no);
         return true;
@@ -2667,7 +2688,7 @@ function draw(m, emptyText = false) {
   let textNode = null;
   if (m.k === "hd") {
     d.dataset.chapterNo = String(m.no || "");
-    d.append(el("small", (m.no > 19 ? "ЭПИЛОГ" : "ГЛАВА " + m.no) + " · СТР. " + m.pages), el("h4", m.t));
+    d.append(el("small", chapterDisplayLabel(m.no).toUpperCase() + " · СТР. " + m.pages), el("h4", m.t));
   }
   else if (m.k === "sep") { d.textContent = "* * *"; d.setAttribute("role", "separator"); }
   else if (m.k === "spk") {
@@ -2729,11 +2750,35 @@ async function addTyped(k, t, bad, x, my) {
   await sleep(450);
 }
 /* --- книжная пагинация: каждые 1600 видимых символов = одна физическая страница --- */
+function isPrologueNodeId(id) {
+  const nodeId = String(id || "");
+  return /^p01_/i.test(nodeId) || STORY_NODE_CHAPTER[nodeId] === "prologue" ||
+    (Array.isArray(STORY_DATA.meta.prologueNodeIds) && STORY_DATA.meta.prologueNodeIds.includes(nodeId));
+}
 function nodeChapterNo(node, id) {
-  const fromData = node && node.chapter && Number(node.chapter.no);
-  if (fromData > 0) return fromData;
+  if (isPrologueNodeId(id)) return 0;
+  const raw = node && node.chapter && node.chapter.no;
+  if (raw != null && Number.isFinite(Number(raw))) return Math.max(0, Number(raw));
   const match = String(id || "").match(/^c(\d+)_/);
-  return match ? Number(match[1]) : (st && Number(st.currentChapter || st.chap)) || 1;
+  if (match) return Number(match[1]);
+  const current = st && (st.currentChapter != null ? Number(st.currentChapter) : Number(st.chap));
+  return Number.isFinite(current) ? Math.max(0, current) : 1;
+}
+function chapterNumberForState(target = st) {
+  if (!target || typeof target !== "object") return 1;
+  if (isPrologueNodeId(target.node)) return 0;
+  if (target.node && STORY_NODE_CHAPTER[target.node] != null) {
+    const key = STORY_NODE_CHAPTER[target.node];
+    return key === "prologue" ? 0 : Number(key);
+  }
+  const raw = target.currentChapter != null ? Number(target.currentChapter) : Number(target.chap);
+  return Number.isFinite(raw) ? Math.max(0, Math.floor(raw)) : 1;
+}
+function chapterDisplayLabel(chapterNo, nodeId) {
+  const value = Number(chapterNo);
+  if (value === 0 || isPrologueNodeId(nodeId)) return "Пролог";
+  if (value > 19) return "Эпилог";
+  return "Глава " + value;
 }
 function pageFromChars(chars) {
   const count = Math.max(0, Number(chars) || 0);
@@ -2822,6 +2867,7 @@ function chapterPathCharRange(nodeId, chapterNo, visiting = new Set()) {
   return result;
 }
 function chapterRootNode(chapterNo) {
+  if (Number(chapterNo) === 0) return STORY_DATA.nodes.p01_01 ? "p01_01" : null;
   const id = "c" + String(chapterNo).padStart(2, "0") + "_01";
   return STORY_DATA.nodes[id] ? id : null;
 }
@@ -2833,7 +2879,7 @@ function ensureBookPaginationState(target = st) {
   if (!target) return;
   if (!target.chapterStartChars || typeof target.chapterStartChars !== "object" || Array.isArray(target.chapterStartChars)) target.chapterStartChars = {};
   if (!target.chapterEndChars || typeof target.chapterEndChars !== "object" || Array.isArray(target.chapterEndChars)) target.chapterEndChars = {};
-  const chapterNo = Number(target.currentChapter || target.chap || nodeChapterNo(STORY_DATA.nodes[target.node], target.node)) || 1;
+  const chapterNo = chapterNumberForState(target);
   if (!Number.isFinite(Number(target.chapterStartChars[chapterNo]))) {
     // Для старого сохранения точное начало главы восстановить нельзя: начинаем точный замер с текущей позиции.
     target.chapterStartChars[chapterNo] = Math.max(0, Number(target.charsRead) || 0);
@@ -2910,7 +2956,7 @@ function updateChapterHeaderPageLabel(chapterNo) {
   if (header) header.pages = range.firstPage + "–" + range.lastPage;
   const domHeader = Array.from(document.querySelectorAll("#chat .m.hd")).find(item => Number(item.dataset.chapterNo) === Number(chapterNo));
   const small = domHeader && domHeader.querySelector("small");
-  if (small) small.textContent = "ГЛАВА " + chapterNo + " · СТР. " + range.firstPage + "–" + range.lastPage;
+  if (small) small.textContent = chapterDisplayLabel(chapterNo, st.node).toUpperCase() + " · СТР. " + range.firstPage + "–" + range.lastPage;
 }
 function syncPageFromChars() {
   if (!st) return 1;
@@ -2931,13 +2977,13 @@ function commitReadChars() {
 function pgInfo() {
   const M = STORY_DATA.meta;
   const n = STORY_DATA.nodes[st.node] || {};
-  const chapterNo = Number(st.currentChapter || st.chap || nodeChapterNo(n, st.node) || 1);
+  const chapterNo = chapterNumberForState(st);
   return { page: pageFromChars(Number(st.charsRead || 0) + Number(st.pendingCharsRead || 0)), chapterNo, c: M.chapters.find(x => Number(x.no) === chapterNo) || null, total: authoredBookTotalPages() };
 }
 function pgTxt() {
   if (!st) return "";
   const { page, chapterNo, total } = pgInfo();
-  return "Глава " + chapterNo + " · Стр. " + page + " / " + total;
+  return chapterDisplayLabel(chapterNo, st.node) + " · Стр. " + page + " / " + total;
 }
 function updateJournalBadge() {
   const badge = $("#jn"), btn = $("#bLog");
@@ -3077,7 +3123,7 @@ function status() {
   $("#hpb").style.background = st.hp <= 6 ? "var(--rd)" : "var(--ac)"; $("#o2b").style.background = st.o2 <= 25 ? "var(--rd)" : "var(--bl)";
   $("#am").textContent = LB.short.ammo + " " + st.ammo;
   const page = pgInfo();
-  $("#pg").textContent = "Глава " + page.chapterNo + " · Стр. " + page.page + " / " + page.total;
+  $("#pg").textContent = chapterDisplayLabel(page.chapterNo, st.node) + " · Стр. " + page.page + " / " + page.total;
   $("#pg").style.setProperty("--p", Math.min(100, page.page / Math.max(1, page.total) * 100) + "%");
   $("#ic").textContent = st.inv.length + "/" + MAXINV;
   updateJournalBadge();
@@ -3146,7 +3192,7 @@ function archiveAbandonedTimeline(index, oldHistory) {
     sharedDecisionCount: index,
     abandonedAt: Date.now(),
     endingNode: st.node || "",
-    endingChapter: Number(st.currentChapter || st.chap) || 1,
+    endingChapter: chapterNumberForState(st),
     visitedNodes: (st.visitedNodes || []).slice(),
     // Сохраняем общий префикс и отвергнутую ветку, чтобы можно было сравнить весь путь.
     decisions: oldHistory.map((d, i) => ({
@@ -3161,7 +3207,7 @@ function archiveAbandonedTimeline(index, oldHistory) {
     surveillanceNotes: (st.surveillanceNotes || []).map(entry => ({...entry})),
     storyMoments: (st.storyMoments || []).map(m => ({...m})),
     endpoint: {
-      chapter: Number(st.currentChapter || st.chap) || 1,
+      chapter: chapterNumberForState(st),
       node: st.node || "",
       hp: st.hp, o2: st.o2, en: st.en, ammo: st.ammo,
       flags: (st.flags || []).slice(), inventory: (st.inv || []).slice(),
@@ -3508,7 +3554,7 @@ async function enter(id) {
   if (requestToken !== chapterEnterToken || !st) return false;
   const n = STORY_DATA.nodes[id]; if (!n) { add("sys", "[ОШИБКА: нет узла " + id + "]", true); return false; }
   const previousNode = st.node;
-  const previousChapterNo = Number(st.currentChapter || st.chap || (previousNode && nodeChapterNo(STORY_DATA.nodes[previousNode], previousNode))) || 1;
+  const previousChapterNo = previousNode ? nodeChapterNo(STORY_DATA.nodes[previousNode], previousNode) : chapterNumberForState(st);
   const nextChapterNo = nodeChapterNo(n, id);
   if (previousNode && previousNode !== id) {
     clearResponseDeadline(true);
@@ -3569,14 +3615,18 @@ async function enter(id) {
     return { t:ft, k:isDialogue ? "spk" : "nar", kind:isDialogue ? "spk" : "nar", n:!isDialogue && typeof m !== "string" && !!m.n, f:typeof m === "string" ? undefined : m.from, nodeId:id, sourceIndex };
   });
   if (n.chapter) {
-    const chapterHeaderNo = Number(n.chapter.no) || st.currentChapter;
+    const chapterHeaderNo = n.chapter.no != null && Number.isFinite(Number(n.chapter.no)) ? Number(n.chapter.no) : nextChapterNo;
     st.chap = chapterHeaderNo;
-    if (chapterHeaderNo !== Number(st.shownChapterHeader || 0)) {
+    const headerAlreadyPresent = (st.chat || []).some(item => item && item.k === "hd" && Number(item.no) === chapterHeaderNo) ||
+      (st.queue || []).some(item => item && item.k === "hd" && Number(item.no) === chapterHeaderNo);
+    if (!headerAlreadyPresent && chapterHeaderNo !== Number(st.shownChapterHeader)) {
       // Крупный книжный заголовок появляется только при первом входе в главу.
       // draw() помещает его в #chat — обычную прокручиваемую ленту сообщений.
       st.queue.unshift({ k: "hd", t: n.chapter.title, no: chapterHeaderNo, pages: chapterHeaderPageText(chapterHeaderNo) });
       st.shownChapterHeader = chapterHeaderNo;
       save();
+    } else if (headerAlreadyPresent) {
+      st.shownChapterHeader = chapterHeaderNo;
     }
   }
   // У каждого содержательного выбора есть отдельный результат в следующей сцене.
@@ -4297,7 +4347,7 @@ function viewArchivedTimeline(branch) {
   modal(m => {
     m.append(el("h3", "АРХИВ ВРЕМЕННОЙ ЛИНИИ №" + branch.id));
     m.append(el("p", "Точка расхождения: " + branch.forkNode + " · " + (branch.changedChoice || "решение не указано") + " · новая ветка: №" + (branch.forkedIntoTimelineId || "—")));
-    m.append(el("p", "Оставленная линия была прервана в сцене " + (branch.endingNode || "неизвестной сцены") + ", глава " + (branch.endingChapter || "—") + "."));
+    m.append(el("p", "Оставленная линия была прервана в сцене " + (branch.endingNode || "неизвестной сцены") + " · " + (branch.endingChapter != null ? chapterDisplayLabel(branch.endingChapter, branch.endingNode) : "глава —") + "."));
     m.append(el("h3", "Полный путь · общая часть и отвергнутая ветка"));
     const sharedCount = Number.isFinite(Number(branch.sharedDecisionCount)) ? Number(branch.sharedDecisionCount) : 0;
     (branch.decisions || []).forEach((d,i) => {
@@ -4314,7 +4364,7 @@ function viewArchivedTimeline(branch) {
       m.append(el("h3", "Прямые вызовы · сохранённые разговоры"));
       branch.callHistory.forEach(entry => {
         const card=el("section",""); card.className="temporal-branch";
-        card.append(el("b", "Глава "+(entry.chapter||"—")+" · "+(entry.contactName||"Контакт")));
+        card.append(el("b", (entry.chapter != null ? chapterDisplayLabel(entry.chapter, entry.nodeId) : "Глава —")+" · "+(entry.contactName||"Контакт")));
         card.append(el("p", entry.title||"Обсуждённая тема"));
         if (entry.surveillance) card.append(el("small","Скрытая слежка: "+entry.surveillance));
         m.append(card);
@@ -4353,10 +4403,10 @@ function viewCompletedRoute(route) {
   modal(m => {
     m.append(el("h3", "ЗАВЕРШЁННАЯ ЛИНИЯ №" + (route.timelineId || "—")));
     m.append(el("p", (route.endingTitle || "Финал") + " · " + (route.endingId || "без ID")));
-    m.append(el("p", "Последняя сцена: " + (route.node || "—") + " · глава " + (route.chapter || "—") + " · решений: " + ((route.decisions || []).length)));
+    m.append(el("p", "Последняя сцена: " + (route.node || "—") + " · " + (route.chapter != null ? chapterDisplayLabel(route.chapter, route.node) : "глава —") + " · решений: " + ((route.decisions || []).length)));
     if (route.chapterPageRanges && Object.keys(route.chapterPageRanges).length) {
       m.append(el("h3", "Фактическая пагинация линии"));
-      Object.entries(route.chapterPageRanges).sort((a,b)=>Number(a[0])-Number(b[0])).forEach(([no,range]) => m.append(el("p", "Глава " + no + " · стр. " + range.firstPage + "–" + range.lastPage + " · " + Number(range.characters||0).toLocaleString("ru-RU") + " знаков")));
+      Object.entries(route.chapterPageRanges).sort((a,b)=>Number(a[0])-Number(b[0])).forEach(([no,range]) => m.append(el("p", chapterDisplayLabel(Number(no)) + " · стр. " + range.firstPage + "–" + range.lastPage + " · " + Number(range.characters||0).toLocaleString("ru-RU") + " знаков")));
     }
     m.append(el("h3", "Выбранный путь"));
     (route.decisions || []).forEach((d,i) => { const p=el("p", (i+1)+". "+d.node+": "+d.text+(d.outcome ? "\nПоследствие: "+d.outcome : "")); p.className="journal-note"; m.append(p); });
@@ -4365,7 +4415,7 @@ function viewCompletedRoute(route) {
       m.append(el("h3", "Прямые вызовы · сохранённые разговоры"));
       route.callHistory.forEach(entry => {
         const card=el("section",""); card.className="temporal-branch";
-        card.append(el("b", "Глава "+(entry.chapter||"—")+" · "+(entry.contactName||"Контакт")));
+        card.append(el("b", (entry.chapter != null ? chapterDisplayLabel(entry.chapter, entry.nodeId) : "Глава —")+" · "+(entry.contactName||"Контакт")));
         card.append(el("p", entry.title||"Обсуждённая тема"));
         if (entry.surveillance) card.append(el("small","Скрытая слежка: "+entry.surveillance));
         m.append(card);
@@ -4392,7 +4442,7 @@ function viewCompletedRoute(route) {
 
 function chronologyChapter(nodeId) {
   const id = String(nodeId || "");
-  if (/^p01_/i.test(id)) return 21;
+  if (/^p01_/i.test(id)) return 0;
   const match = id.match(/^c(\d+)_/i);
   return match ? Math.max(1, Math.min(19, Number(match[1]))) : null;
 }
@@ -4478,18 +4528,19 @@ function viewChronologyLine(line, label) {
     const byChapter = new Map();
     const visitedNodeIds = Array.isArray(line.visitedNodes) ? line.visitedNodes : decisions.map(d => d.node).filter(Boolean);
     const visitedByChapter = new Map();
-    visitedNodeIds.forEach(nodeId => { const ch=chronologyChapter(nodeId)||1; if(!visitedByChapter.has(ch)) visitedByChapter.set(ch,[]); visitedByChapter.get(ch).push(nodeId); });
+    visitedNodeIds.forEach(nodeId => { const ch=chronologyChapter(nodeId); if(ch == null) return; if(!visitedByChapter.has(ch)) visitedByChapter.set(ch,[]); visitedByChapter.get(ch).push(nodeId); });
     decisions.forEach((d, i) => {
-      const ch = chronologyChapter(d.node) || 1;
+      const ch = chronologyChapter(d.node);
+      if (ch == null) return;
       if (!byChapter.has(ch)) byChapter.set(ch, []);
       byChapter.get(ch).push({...d, _index:i});
     });
-    m.append(el("h3", "Карта пройденных глав · 1–19"));
-    for (let ch = 1; ch <= 19; ch++) {
+    m.append(el("h3", "Карта пройденных глав · Пролог и главы 1–19"));
+    for (let ch = 0; ch <= 20; ch++) {
       const rows = byChapter.get(ch) || [];
       const section = el("section", ""); section.className = "temporal-branch";
       const nodes = visitedByChapter.get(ch) || [];
-      section.append(el("b", "Глава " + ch + (nodes.length || rows.length ? " · пройдена" : " · пока не посещалась")));
+      section.append(el("b", chapterDisplayLabel(ch) + (nodes.length || rows.length ? " · пройдена" : " · пока не посещалась")));
       if (nodes.length) { const p=el("p", "Пройденные узлы: "+nodes.join(" → ")); p.className="journal-note"; section.append(p); }
       if (rows.length) rows.forEach(d => {
         const p = el("p", (d.node || "сцена") + " — " + (d.text || "решение") + (d.outcome ? "\nПоследствие: " + d.outcome : ""));
@@ -4506,7 +4557,7 @@ function viewChronologyLine(line, label) {
       m.append(el("h3", "Прямые вызовы · связь с персонажами"));
       callHistory.forEach(entry => {
         const card = el("section", ""); card.className = "temporal-branch";
-        card.append(el("b", "Глава " + (entry.chapter || "—") + " · " + (entry.contactName || "Контакт")));
+        card.append(el("b", (entry.chapter != null ? chapterDisplayLabel(entry.chapter, entry.nodeId) : "Глава —") + " · " + (entry.contactName || "Контакт")));
         card.append(el("p", entry.title || "Обсуждена тема"));
         if (entry.trustDelta) card.append(el("small", "Изменение доверия: " + (entry.trustDelta > 0 ? "+" : "") + entry.trustDelta));
         if (entry.surveillance) card.append(el("small", "Скрытая слежка: " + entry.surveillance));
@@ -4719,21 +4770,21 @@ function ensureDemoChapterCall() {
 }
 
 function bindChapterCallTopics(chapterKey) {
-  const chapterNo = Number(chapterKey);
+  const chapterNo = chapterKey === "prologue" ? 0 : Number(chapterKey);
   const registry = window.CHAPTER_CALLS = window.CHAPTER_CALLS || {};
   Object.entries(registry).forEach(([contactId, entries]) => {
     if (!Array.isArray(entries)) return;
     registry[contactId] = entries.map(topic => {
       if (!topic || typeof topic !== "object") return topic;
       if (topic.chapter != null || topic.chapterNo != null || topic._chapter != null) return topic;
-      return Number.isFinite(chapterNo) && chapterNo > 0 ? {...topic, _chapter: chapterNo} : topic;
+      return Number.isFinite(chapterNo) && chapterNo >= 0 ? {...topic, _chapter: chapterNo} : topic;
     });
   });
   if (chapterNo === 1) ensureDemoChapterCall();
 }
 
 function contactChapterNo() {
-  return Math.max(1, Number(st && (st.currentChapter || st.chap)) || Number(pgInfo().chapterNo) || 1);
+  return chapterNumberForState(st);
 }
 
 function contactHasClueRequirement(reqClue) {
@@ -4766,7 +4817,7 @@ function contactTopicsFor(contactId, chapterNo = contactChapterNo()) {
   const entries = Array.isArray(registry[contactId]) ? registry[contactId] : [];
   return entries.filter(topic => {
     if (!topic || typeof topic !== "object" || !topic.id || !topic.title) return false;
-    const topicChapter = Number(topic.chapter || topic.chapterNo || topic._chapter || chapterNo);
+    const topicChapter = Number(topic.chapter ?? topic.chapterNo ?? topic._chapter ?? chapterNo);
     return topicChapter === Number(chapterNo) && contactTopicRequirementsMet(topic);
   });
 }
@@ -4793,7 +4844,7 @@ async function openContactChannel() {
   ensureDossierList();
   const chapterNo = contactChapterNo();
   try {
-    await loadChapter(chapterNo === 21 ? "prologue" : chapterNo);
+    await loadChapter(chapterNo === 0 ? "prologue" : chapterNo);
     bindChapterCallTopics(chapterNo);
   } catch (error) {
     modal(m => {
@@ -4813,7 +4864,7 @@ function openContactRoster() {
   const people = DOSSIER_DATA.filter(person => st.dossiers.includes(person.id) && person.id !== "aerkhis" && person.id in STORY_RELATION_LABELS);
   modal(m => {
     m.append(el("h3", "КАНАЛ СВЕТА · КОНТАКТЫ"));
-    m.append(el("p", "Глава " + chapterNo + " · доступны только уже знакомые персонажи из Досье."));
+    m.append(el("p", chapterDisplayLabel(chapterNo, st.node) + " · доступны только уже знакомые персонажи из Досье."));
     const roster = el("div", ""); roster.className = "call-roster";
     if (!people.length) {
       roster.append(el("p", "Контакты пока не установлены. Продолжайте сюжет и знакомьтесь с экипажем."));
@@ -4854,7 +4905,7 @@ function openContactTopics(contactId) {
       const discussed = (st.discussedCalls || []).includes(String(topic.id));
       const button = el("button", ""); button.type = "button"; button.className = "call-topic";
       const title = el("strong", (discussed ? "✓ [Обсуждено] " : "◈ ") + topic.title);
-      const detail = el("small", discussed ? "Эта тема уже обсуждалась в текущей временной линии." : (topic.demo ? "Демонстрационная тема · открывается после обнаружения любой улики." : "Глава " + chapterNo + " · прямой вызов"));
+      const detail = el("small", discussed ? "Эта тема уже обсуждалась в текущей временной линии." : (topic.demo ? "Демонстрационная тема · открывается после обнаружения любой улики." : chapterDisplayLabel(chapterNo, st.node) + " · прямой вызов"));
       button.append(title, detail); button.disabled = discussed;
       button.onclick = () => playContactTopic(contactId, topic);
       list.append(button);
@@ -5035,9 +5086,9 @@ function openJournal() {
     } else {
       st.clues.slice().sort((a,b) => Number(a.discoveredAt || 0) - Number(b.discoveredAt || 0)).reverse().forEach(clue => {
         const card = el("section", ""); card.className = "clue-entry" + (clue.read ? "" : " journal-note-new");
-        const chapter = Number(clue.chapter || String(clue.nodeId || "").match(/^c(\d+)_/)?.[1] || 0);
+        const chapter = clue.chapter != null ? Number(clue.chapter) : (isPrologueNodeId(clue.nodeId) ? 0 : Number(String(clue.nodeId || "").match(/^c(\d+)_/)?.[1] || NaN));
         card.append(el("b", "🔎 " + (clue.title || "Найденная улика")));
-        if (chapter || clue.nodeId) card.append(el("small", (chapter ? "Глава " + chapter : "Источник") + (clue.nodeId ? " · " + clue.nodeId : "")));
+        if (Number.isFinite(chapter) || clue.nodeId) card.append(el("small", (Number.isFinite(chapter) ? chapterDisplayLabel(chapter, clue.nodeId) : "Источник") + (clue.nodeId ? " · " + clue.nodeId : "")));
         card.append(el("p", clue.desc || "Описание находки не задано."));
         cluesPanel.append(card);
       });
@@ -5047,7 +5098,7 @@ function openJournal() {
       st.callHistory.slice().reverse().forEach(entry => {
         const item = el("section", ""); item.className = "journal-note";
         item.append(el("b", "📡 " + (entry.contactName || "Контакт") + " · " + (entry.title || "Разговор")));
-        item.append(el("small", "Глава " + (entry.chapter || "—") + " · " + new Date(entry.at || 0).toLocaleString()));
+        item.append(el("small", (entry.chapter != null ? chapterDisplayLabel(entry.chapter, entry.nodeId) : "Глава —") + " · " + new Date(entry.at || 0).toLocaleString()));
         if (entry.surveillance) item.append(el("p", "Скрытая слежка: " + entry.surveillance));
         mainPanel.append(item);
       });
@@ -5098,19 +5149,19 @@ function openJournal() {
     };
     mainPanel.append(lineSelect);
     mainPanel.append(el("p", "Выберите сохранённую линию, чтобы сравнить пройденные главы, решения, последствия и состояние персонажей. Просмотр архива не изменяет активное прохождение."));
-    mainPanel.append(el("h3", "Карта пройденных узлов · главы 1–19"));
+    mainPanel.append(el("h3", "Карта пройденных узлов · Пролог и главы 1–19"));
     const chapterMap = el("div", ""); chapterMap.className = "dossier-list chronology-map";
     const mapDecisions = Array.isArray(st.decisionHistory) ? st.decisionHistory : [];
     const visitedNodeIds = Array.isArray(st.visitedNodes) ? st.visitedNodes : [];
-    const visited = new Set([...visitedNodeIds.map(chronologyChapter), ...mapDecisions.map(d => chronologyChapter(d.node))].filter(Boolean));
-    const currentChapter = Number(st.currentChapter || st.chap) || chronologyChapter(st.node);
-    if (currentChapter) visited.add(currentChapter);
-    for (let ch=1; ch<=21; ch++) {
+    const visited = new Set([...visitedNodeIds.map(chronologyChapter), ...mapDecisions.map(d => chronologyChapter(d.node))].filter(value => value != null));
+    const currentChapter = chapterNumberForState(st);
+    if (currentChapter != null) visited.add(currentChapter);
+    for (let ch=0; ch<=20; ch++) {
       const chapterCard=el("section",""); chapterCard.className="temporal-branch";
-      chapterCard.append(el("b", (ch === 21 ? "Пролог" : "Глава "+ch)+(visited.has(ch)?" · посещена":" · ещё не открыта")));
+      chapterCard.append(el("b", (ch === 0 ? "Пролог" : ch === 20 ? "Эпилог" : "Глава "+ch)+(visited.has(ch)?" · посещена":" · ещё не открыта")));
       const chapterNodes=visitedNodeIds.filter(nodeId=>chronologyChapter(nodeId)===ch);
       if (chapterNodes.length) chapterCard.append(el("small", "Пройденные узлы: "+chapterNodes.join(" → ")));
-      const rows=mapDecisions.map((d,i)=>({...d,_index:i})).filter(d=>(chronologyChapter(d.node)||1)===ch);
+      const rows=mapDecisions.map((d,i)=>({...d,_index:i})).filter(d=>chronologyChapter(d.node)===ch);
       if (!chapterNodes.length && !rows.length) chapterCard.append(el("small", "Узлы и решения появятся здесь после прохождения соответствующей главы."));
       rows.forEach(d=>{
         const item=el("div",""); item.className="journal-note";
@@ -5140,8 +5191,8 @@ function openJournal() {
       decisions.slice().reverse().forEach((d, reverseIndex) => {
         const realIndex = decisions.length - 1 - reverseIndex;
         const card = el("div", ""); card.className = "journal-note";
-        const chapter = Number(String(d.node || '').match(/^c(\d+)_/)?.[1] || 1);
-        const originLabel = d.kind === "realtime" ? "Входящее сообщение" : ("Глава " + chapter + " · " + (d.node || "сцена"));
+        const chapter = chronologyChapter(d.node);
+        const originLabel = d.kind === "realtime" ? "Входящее сообщение" : (chapterDisplayLabel(chapter, d.node) + " · " + (d.node || "сцена"));
         card.append(el("b", "Линия №" + (d.timelineId || st.timelineId || 1) + " · " + originLabel));
         card.append(el("p", d.text || "Принятое решение"));
         if (d.moment && d.moment.text) { const result=el("p", "Последствие: " + d.moment.text); result.className="temporal-note"; card.append(result); }
@@ -5185,21 +5236,21 @@ function openJournal() {
     mainPanel.append(el("h3", "Оглавление · 1600 символов = 1 страница · до " + authoredBookTotalPages() + " стр. написанного текста"));
     const legend = el("p", "✓ Пройдено · ▶ Текущая глава · 🔒 Впереди"); legend.className = "toc-legend"; mainPanel.append(legend);
     const toc = el("div", ""); toc.className = "toc";
-    const current = Math.max(1, Math.min(20, Number(st.chap || pgInfo().c?.no || 1)));
+    const current = Math.max(0, Math.min(20, chapterNumberForState(st)));
     STORY_DATA.meta.chapters.forEach(c => {
       const isCurrent = c.no === current, isDone = c.no < current, locked = c.no > current;
       const row = el("button", ""); row.type = "button"; row.className = "toc-item" + (isDone ? " done" : isCurrent ? " current" : " locked");
       if (locked) row.disabled = true;
       const mark = el("span", isDone ? "✓" : isCurrent ? "▶" : "🔒"); mark.className = "toc-mark";
       const main = el("span", ""); main.className = "toc-main";
-      const name = el("span", (c.no === 20 ? "Эпилог" : "Глава " + c.no) + (c.no === 20 ? "" : ". ") + c.title); name.className = "toc-name";
+      const name = el("span", (c.no === 0 ? "Пролог" : c.no === 20 ? "Эпилог" : "Глава " + c.no) + (c.no === 0 || c.no === 20 ? " · " : ". ") + c.title); name.className = "toc-name";
       const pages = el("span", chapterPageSummary(c.no)); pages.className = "toc-pages";
       main.append(name, pages); row.append(mark, main);
       if (isCurrent) row.title = "Вы находитесь здесь";
       if (!locked) row.onclick = () => {
         const old = row.nextElementSibling;
         if (old && old.classList.contains("toc-summary")) { old.remove(); row.setAttribute("aria-expanded", "false"); return; }
-        const summary = el("p", c.sum || (c.no === 20 ? "Эпилог книги." : "Глава " + c.no)); summary.className = "toc-summary";
+        const summary = el("p", c.sum || (c.no === 0 ? "Пролог книги." : c.no === 20 ? "Эпилог книги." : "Глава " + c.no)); summary.className = "toc-summary";
         row.after(summary); row.setAttribute("aria-expanded", "true");
       };
       toc.append(row);
@@ -5273,7 +5324,7 @@ function showFinal(dead) {
   if (st) {
     commitReadChars();
     ensureBookPaginationState();
-    const finalChapterNo = Number(st.currentChapter || st.chap) || 1;
+    const finalChapterNo = chapterNumberForState(st);
     st.chapterEndChars[String(finalChapterNo)] = Math.max(0, Number(st.charsRead) || 0);
     updateChapterHeaderPageLabel(finalChapterNo);
     save();
