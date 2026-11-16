@@ -119,6 +119,7 @@ html{background:#02030a}body{height:100dvh;overflow:hidden}
 #splash .ttl{width:100%;font-size:clamp(2rem,9.6vw,3.3rem);line-height:1.02;letter-spacing:.055em;overflow-wrap:anywhere;filter:drop-shadow(0 0 10px #4da3ff99)}
 @keyframes glow{50%{filter:drop-shadow(0 0 20px #5aaaffee) drop-shadow(0 0 44px #2a6dffaa)}}
 #splash .sub{font-size:clamp(.7rem,3.1vw,1.08rem)}
+#splash .sub{font-style:normal}
 #splash .blurb{font-size:clamp(.68rem,2.85vw,.98rem);line-height:1.5;max-width:73.3vw;color:#d3dcff;text-shadow:0 1px 6px #000}
 #splash .cred,#splash .sub,#splash .kick{text-shadow:0 1px 5px #000}
 #splash .cred{font-size:clamp(7px,1.83vw,10px);line-height:1.35}
@@ -436,6 +437,7 @@ body {
 .chronology-map .journal-note{margin:8px 0;padding:10px;border-left:2px solid rgba(150,190,215,.35)}
 .chronology-map button{width:100%;margin-top:8px;white-space:normal}
 #spChronicle{letter-spacing:.12em;box-shadow:0 0 18px #9a83ff22}#spChronicle[hidden]{display:none!important}
+#spCont:disabled{opacity:.34!important;filter:saturate(.55);cursor:not-allowed}
 /* --- Исследование окружения: отдельный мягко подсвеченный блок над выборами --- */
 #game #chs .inspect-section {
   display:flex; flex-direction:column; gap:7px; width:100%;
@@ -498,7 +500,7 @@ body {
 </style></head><body>
 
 <div id="loader" class="scr on"><div class="ld-t" id="ldT"></div><div class="ld-bar"><i id="ldbar"></i></div><div id="ldlog"></div><div class="cred" id="ldA"></div></div>
-<div id="splash" class="scr"><div class="cv"></div><div class="shade"></div><canvas id="snow"></canvas><div class="in"><div class="cover-title"><div class="kick">АВТОРСКАЯ КНИГА-ИГРА</div><h1 class="ttl" id="spT" aria-label="НАБЛЮДАТЕЛИ АНДРОМЕДЫ"><span class="title-line" id="spT1">НАБЛЮДАТЕЛИ</span><span class="title-line" id="spT2">АНДРОМЕДЫ</span></h1></div><div class="sub" id="spS"></div><div class="blurb" id="spB"></div><div class="cred" id="spF"></div><button id="spGo" class="big">НАЧАТЬ ИГРУ</button><button id="spCont" class="big" style="display:none;background:var(--pn);color:var(--tx);border:1px solid var(--ln)">ПРОДОЛЖИТЬ</button><button id="spChronicle" class="big" hidden style="background:linear-gradient(105deg,#182641,#241b3c);color:#e6e9ff;border:1px solid #8e7ac8">⧖ ХРОНОЛОГИЯ (Т2)</button><div class="cred" id="spC"></div><div class="cred" id="spA"></div></div></div>
+<div id="splash" class="scr"><div class="cv"></div><div class="shade"></div><canvas id="snow"></canvas><div class="in"><div class="cover-title"><div class="kick">АВТОРСКАЯ КНИГА-ИГРА</div><h1 class="ttl" id="spT" aria-label="НАБЛЮДАТЕЛИ АНДРОМЕДЫ"><span class="title-line" id="spT1">НАБЛЮДАТЕЛИ</span><span class="title-line" id="spT2">АНДРОМЕДЫ</span></h1></div><div class="sub" id="spS"></div><div class="blurb" id="spB" hidden></div><div class="cred" id="spF" hidden></div><button id="spGo" class="big">НАЧАТЬ ИГРУ</button><button id="spCont" class="big" style="background:var(--pn);color:var(--tx);border:1px solid var(--ln)">ПРОДОЛЖИТЬ</button><button id="spChronicle" class="big" hidden style="background:linear-gradient(105deg,#182641,#241b3c);color:#e6e9ff;border:1px solid #8e7ac8">⧖ ХРОНОЛОГИЯ (Т2)</button><div class="cred" id="spC" hidden></div><div class="cred" id="spA" hidden></div></div></div>
 <div id="prologue" class="scr"><div class="in"><div class="kick">ПРОЛОГ · ТЕНЬ ЗА СТЕКЛОМ АРХИВА</div><div id="pr"></div><button id="prGo" class="big pp">ВЫБРАТЬ ПУТЬ</button></div></div>
 <div id="setup" class="scr">
  <h1>ВЫБОР ПУТИ</h1><div style="color:var(--dim)">Вы Лиор’Саэн, тихий спутник, чей свет ведёт Аэ́рхиса. Выберите путь Наблюдателя.</div><div class="cred" id="credA"></div><div class="cred" id="ucA"></div>
@@ -508,7 +510,6 @@ body {
  <h2>Темп</h2><div class="row"><button id="mReal" class="sel">Реалистичный</button><button id="mFast">Быстрый</button></div>
  <h2>Звук терминала</h2><div class="row"><button id="snd" class="sel">Звук: вкл</button></div>
  <button id="go" disabled>ВОЙТИ В КАНАЛ СВЕТА</button>
- <button id="cont" style="width:100%;margin-top:6px;display:none">Продолжить сохранённую игру</button>
 </div>
 
 <div id="game" class="scr">
@@ -669,7 +670,7 @@ function isKnownStoryNode(nodeId) {
   return Object.prototype.hasOwnProperty.call(STORY_NODE_CHAPTER, String(nodeId || ""));
 }
 function loadChapter(chapterNum) {
-  const key = chapterNum === "prologue" ? "prologue" : Number(chapterNum);
+  const key = chapterNum === "prologue" || chapterNum === 0 || chapterNum === "0" ? "prologue" : Number(chapterNum);
   const src = STORY_CHAPTER_PATHS[key];
   if (!src) return Promise.reject(new Error("Неизвестный модуль главы: " + chapterNum));
   if (loadedStoryChapters.has(key)) return Promise.resolve(key);
@@ -722,6 +723,7 @@ async function loadChaptersForState(targetState) {
   const ids = new Set();
   const addNode = value => { if (value && isKnownStoryNode(value)) ids.add(String(value)); };
   addNode(targetState.node);
+  addNode(targetState.pendingNodeId);
   (Array.isArray(targetState.visitedNodes) ? targetState.visitedNodes : []).forEach(addNode);
   ["chat","queue","log"].forEach(field => (Array.isArray(targetState[field]) ? targetState[field] : []).forEach(record => addNode(record && record.nodeId)));
   (Array.isArray(targetState.decisionHistory) ? targetState.decisionHistory : []).forEach(entry => {
@@ -2091,7 +2093,7 @@ const sfx = { msg: () => { tone(1100, .09); setTimeout(() => tone(1500, .08), 90
 function drawSetup() {
   const box = $("#heroes"); box.innerHTML = "";
   const card = (h, key) => { const b = document.createElement("button"); b.className = "hero" + (sel === key ? " sel" : ""); b.append(el("b", h.name + (h.path ? " · " + h.path : "")));
-    h.desc && b.append(el("small", h.desc)); h.skills && b.append(el("small", "Навыки: " + h.skills.join(", "))); h.items && b.append(el("small", "Снаряжение: " + h.items.join(", ") + " · слова " + h.ammo));
+    h.desc && b.append(el("small", h.desc)); h.skills && b.append(el("small", "Навыки: " + h.skills.join(", "))); h.items && b.append(el("small", "Снаряжение: " + h.items.join(", ")));
     b.onclick = () => { sfx.click(); sel = key; drawSetup(); }; box.append(b); };
   STORY_DATA.heroes.forEach(h => card(h, h.id));
   card({ name: "＋ Создать свой путь", desc: "Имя и 4 навыка по вашему выбору" }, "custom");
@@ -2125,18 +2127,33 @@ $("#go").onclick = () => {
   // Если история уже завершалась, новый старт — это новая временная линия.
   if (startingTimelineId > 1) speakT2OnTimelineJump();
 };
-$("#cont").onclick = async () => {
+async function continueSavedGame() {
   const savedRaw = lsGet(KEY);
-  if (!savedRaw) {
-    modal(m => { m.append(el("h3", "СОХРАНЕНИЕ НЕ НАЙДЕНО"), el("p", "Сохранённого прохождения нет. Начните новую игру с обложки.")); });
-    refresh();
-    return false;
-  }
+  if (!savedRaw) { refresh(); return false; }
+  let resumePendingNodeId = "";
+  let savedChatScrollTop = null;
+  let savedChatScrollAnchor = null;
   try {
     st = JSON.parse(savedRaw);
-    if (!st || typeof st !== "object" || Array.isArray(st) || !st.node || !isKnownStoryNode(st.node)) throw new Error("Некорректная структура сохранения");
+    if (!st || typeof st !== "object" || Array.isArray(st)) throw new Error("Некорректная структура сохранения");
+    const storedNodeId = String(st.nodeId || st.node || st.pendingNodeId || "");
+    resumePendingNodeId = String(st.pendingNodeId || "");
+    if (!storedNodeId || !isKnownStoryNode(storedNodeId)) throw new Error("В сохранении отсутствует известный текущий узел.");
+    if (resumePendingNodeId && !isKnownStoryNode(resumePendingNodeId)) throw new Error("В сохранении указан неизвестный ожидающий узел.");
+    if (!st.node) st.node = storedNodeId;
+    st.nodeId = String(st.node);
+    const loadNodeId = resumePendingNodeId || storedNodeId;
+    const savedChapter = isPrologueNodeId(loadNodeId) ? 0 : Number(chapterForNodeId(loadNodeId));
+    if (!Number.isFinite(savedChapter) || savedChapter < 0) throw new Error("Не удалось определить главу сохранённого узла " + loadNodeId + ".");
+    savedChatScrollTop = st.chatScrollTop != null && Number.isFinite(Number(st.chatScrollTop)) ? Math.max(0, Number(st.chatScrollTop)) : null;
+    if (st.chatScrollAnchor && Number.isInteger(Number(st.chatScrollAnchor.index)) && Number.isFinite(Number(st.chatScrollAnchor.offset))) {
+      savedChatScrollAnchor = {index:Math.max(0, Number(st.chatScrollAnchor.index)), offset:Number(st.chatScrollAnchor.offset)};
+    }
+    st.chapterNum = savedChapter;
+    await loadChapter(savedChapter);
     await loadChaptersForState(st);
     if (!STORY_DATA.nodes[st.node]) throw new Error("Текущий сюжетный узел не найден после загрузки модулей глав.");
+    if (resumePendingNodeId && !STORY_DATA.nodes[resumePendingNodeId]) throw new Error("Ожидающий сюжетный узел не найден после загрузки модуля главы.");
   } catch (error) {
     console.error("Ошибка восстановления сохранения:", error);
     st = null;
@@ -2213,7 +2230,7 @@ $("#cont").onclick = async () => {
     if (!Number.isFinite(Number(st.pendingCharsRead)) || Number(st.pendingCharsRead) < 0) st.pendingCharsRead = 0;
     st.charsRead = Math.max(0, Math.floor(Number(st.charsRead) || 0));
     st.pendingCharsRead = Math.max(0, Math.floor(Number(st.pendingCharsRead) || 0));
-    st.currentPage = pageFromChars(st.charsRead);
+    st.currentPage = pageFromChars(st.charsRead + st.pendingCharsRead);
     st.pageSchemeVersion = 4;
     st.page = st.currentPage; st.chap = st.currentChapter;
     ensureBookPaginationState();
@@ -2322,11 +2339,37 @@ $("#cont").onclick = async () => {
     save();
   }
 
-  // Продолжаем текущую очередь, не вызывая enter(): это не повторяет эффекты
-  // сцены, не списывает ресурсы второй раз и не сбрасывает её таймеры.
+  // Восстанавливаем полную ленту без принудительной прокрутки к последнему сообщению.
   stopResponseDeadlineTicker();
-  show("game"); status(); $("#chat").innerHTML = ""; st.chat.forEach(draw); processRealtimeQueue(); pump();
-};
+  show("game"); status();
+  const chatPane = $("#chat");
+  chatPane.innerHTML = "";
+  st.chat.forEach(message => draw(message, false, {autoScroll:false}));
+  await new Promise(resolve => requestAnimationFrame(resolve));
+  const maxScroll = Math.max(0, chatPane.scrollHeight - chatPane.clientHeight);
+  if (savedChatScrollAnchor && chatPane.children[savedChatScrollAnchor.index]) {
+    const paneTop = chatPane.getBoundingClientRect().top;
+    const anchorTop = chatPane.children[savedChatScrollAnchor.index].getBoundingClientRect().top;
+    const adjusted = chatPane.scrollTop + (anchorTop - paneTop) - savedChatScrollAnchor.offset;
+    chatPane.scrollTop = Math.max(0, Math.min(adjusted, maxScroll));
+  } else {
+    chatPane.scrollTop = savedChatScrollTop == null ? maxScroll : Math.min(savedChatScrollTop, maxScroll);
+  }
+  st.chatScrollTop = chatPane.scrollTop;
+  st.nodeId = String(st.node || st.nodeId);
+  st.chapterNum = chapterNumberForState(st);
+  save();
+  if (resumePendingNodeId) {
+    // Выбор уже применён, но браузер был закрыт во время загрузки следующего модуля.
+    // Завершаем переход ровно один раз: enter() выполнит эффекты входа в целевой узел.
+    await enter(resumePendingNodeId);
+  } else {
+    processRealtimeQueue();
+    pump({resume:true});
+  }
+  refresh();
+  return true;
+}
 const show = id => {
   document.querySelectorAll(".scr").forEach(e => e.classList.toggle("on", e.id === id));
   const inGame = id === "game";
@@ -2338,7 +2381,30 @@ const show = id => {
 const save = () => {
   try {
     if (st && typeof st === "object") {
-      st.transcriptVersion = 2;
+      st.transcriptVersion = 3;
+      st.nodeId = st.node ? String(st.node) : (st.nodeId ? String(st.nodeId) : null);
+      const saveChapter = st.pendingNodeId && isKnownStoryNode(st.pendingNodeId)
+        ? (isPrologueNodeId(st.pendingNodeId) ? 0 : Number(chapterForNodeId(st.pendingNodeId)))
+        : (st.node ? chapterNumberForState(st) : Number(st.currentChapter != null ? st.currentChapter : st.chap) || 0);
+      st.chapterNum = Math.max(0, Number(saveChapter) || 0);
+      if (Number.isFinite(Number(st.charsRead)) || Number.isFinite(Number(st.pendingCharsRead))) {
+        st.currentPage = pageFromChars(Math.max(0, Number(st.charsRead) || 0) + Math.max(0, Number(st.pendingCharsRead) || 0));
+        st.page = st.currentPage;
+      }
+      const chatPane = document.querySelector("#chat");
+      if (chatPane) {
+        st.chatScrollTop = Math.max(0, Number(chatPane.scrollTop) || 0);
+        st.chatScrollHeight = Math.max(0, Number(chatPane.scrollHeight) || 0);
+        const paneRect = chatPane.getBoundingClientRect();
+        const children = chatPane.children;
+        let anchor = null;
+        for (let i = 0; i < children.length; i++) {
+          const rect = children[i].getBoundingClientRect();
+          if (rect.bottom > paneRect.top + 1) { anchor = {index:i, offset:rect.top - paneRect.top}; break; }
+        }
+        st.chatScrollAnchor = anchor;
+      }
+      st.savedAt = Date.now();
       if (!Array.isArray(st.chat)) st.chat = [];
       if (!Array.isArray(st.queue)) st.queue = [];
       const normalizeRecord = record => {
@@ -2361,6 +2427,19 @@ const save = () => {
     console.warn('Не удалось сохранить полное состояние книги. Возможна нехватка места в хранилище браузера.', e);
   }
 };
+let chatScrollSaveTimer = null;
+function scheduleChatScrollSave() {
+  if (!st) return;
+  if (chatScrollSaveTimer) clearTimeout(chatScrollSaveTimer);
+  chatScrollSaveTimer = setTimeout(() => { chatScrollSaveTimer = null; save(); }, 180);
+}
+function flushChatScrollSave() {
+  if (chatScrollSaveTimer) { clearTimeout(chatScrollSaveTimer); chatScrollSaveTimer = null; }
+  if (st) save();
+}
+$("#chat").addEventListener("scroll", scheduleChatScrollSave, {passive:true});
+window.addEventListener("pagehide", flushChatScrollSave);
+window.addEventListener("beforeunload", flushChatScrollSave);
 function ensureItemState() {
   if (!st) return;
   if (!Array.isArray(st.inv)) st.inv = [];
@@ -2682,7 +2761,7 @@ function bookTextCharCount(value) {
   // Считаем Unicode-символы, включая пробелы и знаки препинания.
   return Array.from(String(value == null ? "" : value)).length;
 }
-function draw(m, emptyText = false) {
+function draw(m, emptyText = false, options = {}) {
   const d = document.createElement("div"); d.className = "m " + m.k + (m.bad ? " bad" : "");
   let textNode = null;
   if (m.k === "hd") {
@@ -2710,7 +2789,10 @@ function draw(m, emptyText = false) {
     if (speaker) d.title = speaker;
   }
   else { if (m.k === "in") d.append(el("b", m.f || st.hero)); textNode = document.createTextNode(emptyText ? "" : m.t); d.append(textNode); }
-  const c = $("#chat"); c.append(d); c.scrollTop = c.scrollHeight;
+  const c = $("#chat");
+  const wasNearBottom = c.scrollHeight - c.clientHeight - c.scrollTop <= 28;
+  c.append(d);
+  if (options.autoScroll !== false && wasNearBottom) c.scrollTop = c.scrollHeight;
   return { element: d, textNode };
 }
 function makeTranscriptRecord(k, t, bad, x) {
@@ -3537,7 +3619,8 @@ function waitDurationMs(node, mode) {
 async function enter(id) {
   const requestToken = ++chapterEnterToken;
   const chapterNo = chapterForNodeId(id);
-  if (!chapterNo) { add("sys", "[ОШИБКА: неизвестный узел " + id + "]", true); return false; }
+  if (chapterNo == null) { add("sys", "[ОШИБКА: неизвестный узел " + id + "]", true); return false; }
+  if (st) { st.pendingNodeId = String(id); save(); }
   if (!STORY_DATA.nodes[id]) {
     const typing = $("#typ");
     if (typing) typing.textContent = "Загружается глава " + chapterNo + "…";
@@ -3576,6 +3659,9 @@ async function enter(id) {
     });
   }
   st.node = id;
+  st.nodeId = String(id);
+  st.chapterNum = nextChapterNo;
+  delete st.pendingNodeId;
   if (!Array.isArray(st.visitedNodes)) st.visitedNodes = [];
   if (!st.visitedNodes.includes(id)) st.visitedNodes.push(id);
   unlockDossiersForNode(id);
@@ -3717,7 +3803,7 @@ function deliverIncomingCall(node) {
   return true;
 }
 
-async function pump() {
+async function pump(options = {}) {
   const my = ++run; skip = false; $("#chat").onclick = null; let first = null, hasParagraph = false; modeBtn(); status(); $("#chs").innerHTML = ""; $("#chs").style.maxHeight = ""; $("#chh").hidden = true; $("#wait").hidden = true;
   while (st.pend.length) { await askDrop(st.pend[0]); if (my !== run) return; }
   while (st.queue.length && !st.dead) {
@@ -3785,7 +3871,7 @@ async function pump() {
     st.waitMode = null;
     save();
     if (!waitResult.skipped) notifyReady(n);
-  } else if (hasParagraph && n.choices && n.choices.length && st.mode !== "fast") {
+  } else if (hasParagraph && n.choices && n.choices.length && st.mode !== "fast" && !options.resume) {
     const hint = $("#chh");
     hint.textContent = "Варианты выбора появятся автоматически через 5 секунд";
     hint.hidden = false;
@@ -4064,9 +4150,13 @@ function choices(n) {
   scrollChatToBottom();
 }
 
-function scrollChatToBottom() {
+function scrollChatToBottom(force = false) {
   const c = $("#chat");
-  requestAnimationFrame(() => { c.scrollTop = c.scrollHeight; });
+  const wasNearBottom = c.scrollHeight - c.clientHeight - c.scrollTop <= 28;
+  if (!force && !wasNearBottom) return;
+  requestAnimationFrame(() => {
+    if (force || c.scrollHeight - c.clientHeight - c.scrollTop <= 28) c.scrollTop = c.scrollHeight;
+  });
 }
 function fitChoices() {
   // Варианты остаются в закреплённом нижнем блоке; скроллится только книга.
@@ -5311,12 +5401,28 @@ const UKEY = "unlocked_endings";
 function getU() { try { return JSON.parse(lsGet(UKEY)) || []; } catch (e) { return []; } }
 function unlock(id) { if (!STORY_DATA.meta.endings[id]) return false; const u = getU(); if (u.includes(id)) return false; u.push(id); try { localStorage.setItem(UKEY, JSON.stringify(u)); } catch (e) {} return true; }
 const countTxt = () => "Открыто концовок: " + getU().filter(i => STORY_DATA.meta.endings[i]).length + " / " + STORY_DATA.meta.endingTotal;
+function readUsableSave() {
+  const raw = lsGet(KEY);
+  if (!raw) return null;
+  try {
+    const candidate = JSON.parse(raw);
+    const nodeId = String(candidate && (candidate.pendingNodeId || candidate.nodeId || candidate.node) || "");
+    if (!candidate || typeof candidate !== "object" || Array.isArray(candidate) || !nodeId || !isKnownStoryNode(nodeId)) return null;
+    return candidate;
+  } catch (error) { return null; }
+}
 function refresh() {
-  $("#spC").textContent = $("#ucA").textContent = countTxt(); const sv = !!lsGet(KEY);
-  $("#cont").style.display = $("#spCont").style.display = sv ? "" : "none";
-  const unlocked = isChronicleUnlocked();
-  $("#spChronicle").hidden = !unlocked;
-  if (unlocked) saveMetaProgress();
+  $("#spC").textContent = $("#ucA").textContent = countTxt();
+  const hasSave = !!readUsableSave();
+  const continueButton = $("#spCont");
+  continueButton.hidden = false;
+  continueButton.style.display = "";
+  continueButton.disabled = !hasSave;
+  continueButton.textContent = hasSave ? "ПРОДОЛЖИТЬ" : "Нет сохранения";
+  continueButton.setAttribute("aria-disabled", hasSave ? "false" : "true");
+  // Хронология остаётся доступной внутри игры; обложка содержит только два основных действия.
+  $("#spChronicle").hidden = true;
+  if (isChronicleUnlocked()) saveMetaProgress();
 }
 function showFinal(dead) {
   // Фиксируем фактический конец последней главы, включая её последнюю показанную реплику.
@@ -5359,7 +5465,7 @@ function showFinal(dead) {
 /* --- заставка, пролог --- */
 const M = STORY_DATA.meta, CRED = "Авторская книга-игра · " + M.author;
 document.title = M.title + " — авторская книга-игра";
-$("#ldT").textContent = M.title; $("#ldA").textContent = CRED; const coverTitleParts = String(M.title || "НАБЛЮДАТЕЛИ АНДРОМЕДЫ").trim().split(/\s+/); $("#spT1").textContent = coverTitleParts.shift() || "НАБЛЮДАТЕЛИ"; $("#spT2").textContent = coverTitleParts.join(" ") || "АНДРОМЕДЫ"; $("#spT").setAttribute("aria-label", String(M.title || "НАБЛЮДАТЕЛИ АНДРОМЕДЫ")); $("#spS").textContent = M.sub; $("#spB").textContent = M.blurb; $("#spF").textContent = M.facts; $("#spA").textContent = CRED;
+$("#ldT").textContent = M.title; $("#ldA").textContent = CRED; const coverTitleParts = String(M.title || "НАБЛЮДАТЕЛИ АНДРОМЕДЫ").trim().split(/\s+/); $("#spT1").textContent = coverTitleParts.shift() || "НАБЛЮДАТЕЛИ"; $("#spT2").textContent = coverTitleParts.join(" ") || "АНДРОМЕДЫ"; $("#spT").setAttribute("aria-label", String(M.title || "НАБЛЮДАТЕЛИ АНДРОМЕДЫ")); $("#spS").textContent = M.facts || "Авторская книга-игра · 19 глав и 4 варианта эпилога"; $("#spB").textContent = ""; $("#spF").textContent = ""; $("#spA").textContent = "";
 $("#credA").textContent = $("#credG").textContent = M.title + " · " + CRED;
 function loadCover() {
   const cover = document.querySelector(".cv");
@@ -5431,7 +5537,7 @@ async function prologue() {
   $("#prologue .in").scrollTop = 0;
 }
 $("#spGo").onclick = () => { sfx.click(); prologue(); };
-$("#spCont").onclick = () => $("#cont").onclick();
+$("#spCont").onclick = () => { if (!$("#spCont").disabled) continueSavedGame(); };
 $("#spChronicle").onclick = () => { sfx.click(); openChronologyFromSplash(); };
 $("#prGo").onclick = () => { sfx.click(); show("setup"); };
 refresh(); drawSetup(); boot();
