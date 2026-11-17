@@ -560,7 +560,7 @@ body {
   <div class="tl"><b id="o2t"></b><div class="bar"><i id="o2b" style="background:var(--bl)"></i></div><b id="ent"></b><div class="bar"><i id="enb" style="background:var(--am)"></i></div><b id="am" style="min-width:56px"></b></div>
   <div class="pg" id="pg"></div>
  </div>
- <div class="cred" id="credG"></div><div id="chat"></div><div id="typ"></div>
+ <div class="cred" id="credG"></div><div id="chat" tabindex="-1" aria-label="Текст книги"></div><div id="typ"></div>
  <div id="bot"><div id="wait" hidden></div><button id="chh" type="button" hidden aria-expanded="true" aria-controls="chs" title="Свернуть список действий">ВАШ ВЫБОР / ДЕЙСТВИЕ:</button><div id="chs"></div></div>
 </div>
 <div id="final" class="scr"><div id="fn"></div></div>
@@ -661,7 +661,7 @@ window.STORY_DATA = {
     "Осколок света": { kind: "restore", energy: 40, consume: true, hint: "+40% света", description: "Осколок энергии Андромеды. Восстанавливает 40% Света Лиор’Саэна." },
     "Целебный отвар": { kind: "restore", hp: 6, consume: true, hint: "+6 жизненной силы", description: "Горячий лечебный настой. Восстанавливает 6 единиц жизненной силы." },
 
-    // Многоразовые инструменты: активация доступна один раз в каждом сюжетном узле.
+    // Многоразовые инструменты: одна активация на главу; перезарядка при переходе к следующей главе.
     "Дневник наблюдателя": { kind: "tool", reusePerNode: true, skills: ["Наблюдение", "Память"], addFlags: ["ДНЕВНИК_ЗАПИСАЛ_СЦЕНУ"], hint: "подсказка сцены + Наблюдение/Память", description: "Записывает важную деталь текущей сцены и помогает заметить закономерности. Даёт разовую поддержку навыков Наблюдение и Память." },
     "Спектральный компас": { kind: "tool", reusePerNode: true, skills: ["Навигация", "Наблюдение"], hint: "Навигация/Наблюдение на эту сцену", description: "Считывает безопасные направления и слабые следы. Даёт разовую поддержку Навигации и Наблюдения." },
     "Экранированный кристалл": { kind: "tool", reusePerNode: true, skills: ["Интуиция", "Скрытность"], hint: "глушение следа · Интуиция/Скрытность", description: "Подавляет заметные энергетические следы и помогает обойти поиск. Даёт разовую поддержку Интуиции и Скрытности." },
@@ -2177,7 +2177,7 @@ $("#go").onclick = () => {
   } else {
     metaProgress.activeTimelineId = 1;
   }
-  st = { timelineId: startingTimelineId, activeTimelineId: startingTimelineId, timelines: previousArchive, hero: h.name, arch: sel === "custom" ? "Свой персонаж" : (h.path || h.name), stats: { steps: 0, choices: 0, skills: 0, skillList: [], dmg: 0, ammo: 0, o2: 0, en: 0 }, skills: [...h.skills], mode: cfg.mode, sound: cfg.sound, hp: 20, o2: 100, en: 100, ammo: h.ammo, inv: [...h.items], itemBuffs: [], itemUseLog: {}, equipment: {}, flags: [], journalSeen: [], inspectedInspects: [], clues: [], discussedCalls: [], callHistory: [], surveillanceNotes: [], dossiers: ["aerkhis", "liorsaen"], chat: [], queue: [], pend: [], node: null, currentChapter: 0, shownChapterHeader: -1, currentPage: 1, charsRead: 0, pendingCharsRead: 0, chapterStartChars: {"0":0}, chapterEndChars: {}, pageSchemeVersion: 4, temporalHistoryVersion: 3, chap: 0, page: 1, waitUntil: 0, waitMode: null, waitDone: false, waitWasSkipped: false, activeResponseDeadline: null, incomingCallsDelivered: [], notificationsEnabled: false, decisionHistory: [], decisionSequence: 0, storyMoments: [], pendingOutcome: null, realtimeSchedule: [], realtimeInbox: [], realtimeDelivered: [], storyVars: {}, relationships: {}, characterFates: {}, dead: false };
+  st = { timelineId: startingTimelineId, activeTimelineId: startingTimelineId, timelines: previousArchive, hero: h.name, arch: sel === "custom" ? "Свой персонаж" : (h.path || h.name), stats: { steps: 0, choices: 0, skills: 0, skillList: [], dmg: 0, ammo: 0, o2: 0, en: 0 }, skills: [...h.skills], mode: cfg.mode, sound: cfg.sound, hp: 20, o2: 100, en: 100, ammo: h.ammo, inv: [...h.items], itemBuffs: [], itemUseLog: {}, itemUseChapterLog: {}, equipment: {}, flags: [], journalSeen: [], inspectedInspects: [], clues: [], discussedCalls: [], callHistory: [], surveillanceNotes: [], dossiers: ["aerkhis", "liorsaen"], chat: [], queue: [], pend: [], node: null, currentChapter: 0, shownChapterHeader: -1, currentPage: 1, charsRead: 0, pendingCharsRead: 0, chapterStartChars: {"0":0}, chapterEndChars: {}, pageSchemeVersion: 4, temporalHistoryVersion: 3, chap: 0, page: 1, waitUntil: 0, waitMode: null, waitDone: false, waitWasSkipped: false, activeResponseDeadline: null, incomingCallsDelivered: [], notificationsEnabled: false, decisionHistory: [], decisionSequence: 0, storyMoments: [], pendingOutcome: null, realtimeSchedule: [], realtimeInbox: [], realtimeDelivered: [], storyVars: {}, relationships: {}, characterFates: {}, dead: false };
   applyT2Carryover(st);
   $("#chat").innerHTML = ""; show("game"); status(); enter(STORY_DATA.meta.start);
   // Если история уже завершалась, новый старт — это новая временная линия.
@@ -2503,14 +2503,45 @@ function ensureItemState() {
   const hadExpiryMap = !!(st.itemBuffExpiries && typeof st.itemBuffExpiries === 'object' && !Array.isArray(st.itemBuffExpiries));
   if (!hadExpiryMap) st.itemBuffExpiries = {};
   if (!st.itemUseLog || typeof st.itemUseLog !== 'object' || Array.isArray(st.itemUseLog)) st.itemUseLog = {};
+  if (!st.itemUseChapterLog || typeof st.itemUseChapterLog !== 'object' || Array.isArray(st.itemUseChapterLog)) st.itemUseChapterLog = {};
   if (!st.equipment || typeof st.equipment !== 'object' || Array.isArray(st.equipment)) st.equipment = {};
+
+  // Миграция старых сохранений: старый журнал отмечал использование только по узлам.
+  // Переносим эти отметки на уровень главы, чтобы предмет не активировался повторно
+  // после перехода в следующую сцену той же главы. На следующей главе он перезарядится.
+  Object.entries(st.itemUseLog).forEach(([itemName, uses]) => {
+    if (!uses || typeof uses !== 'object' || Array.isArray(uses)) return;
+    if (!st.itemUseChapterLog[itemName] || typeof st.itemUseChapterLog[itemName] !== 'object') st.itemUseChapterLog[itemName] = {};
+    Object.entries(uses).forEach(([scope, used]) => {
+      if (!used) return;
+      if (scope.indexOf('chapter:') === 0) {
+        const chapterKey = scope.slice(8);
+        if (chapterKey !== '' && Number.isFinite(Number(chapterKey))) st.itemUseChapterLog[itemName][chapterKey] = true;
+        return;
+      }
+      let chapterNo = null;
+      if (scope === '__setup__') chapterNo = chapterNumberForState(st);
+      else if (isPrologueNodeId(scope)) chapterNo = 0;
+      else {
+        const mappedChapter = chapterForNodeId(scope);
+        if (mappedChapter === 'prologue') chapterNo = 0;
+        else if (mappedChapter != null && Number.isFinite(Number(mappedChapter))) chapterNo = Number(mappedChapter);
+        else {
+          const match = String(scope).match(/^c(\d+)_/i);
+          if (match) chapterNo = Number(match[1]);
+        }
+      }
+      if (chapterNo != null && Number.isFinite(Number(chapterNo))) st.itemUseChapterLog[itemName][String(chapterNo)] = true;
+    });
+  });
+
   // Миграция старых сохранений: восстанавливаем срок действия уже активированных бонусов.
   if (!hadExpiryMap && st.itemBuffs.length) {
     st.itemBuffs = st.itemBuffs.filter(skill => {
       let latestReusableNode = null;
       Object.entries(STORY_DATA.items || {}).forEach(([name, fx]) => {
         if (!fx || !fx.reusePerNode || !(fx.skills || []).includes(skill)) return;
-        const uses = Object.keys(st.itemUseLog[name] || {});
+        const uses = Object.keys(st.itemUseLog[name] || {}).filter(key => key !== '__setup__' && key.indexOf('chapter:') !== 0);
         if (uses.length) latestReusableNode = uses[uses.length - 1];
       });
       if (latestReusableNode) {
@@ -2529,13 +2560,40 @@ function hasSkill(skill) {
   ensureItemState();
   return st.skills.includes(skill) || st.itemBuffs.includes(skill) || (skill === 'Выживание' && !!st.equipment.warmCoat);
 }
+function itemHasChapterCooldown(fx) {
+  return !!(fx && fx.kind === 'tool' && !fx.consume);
+}
 function usedItemInNode(item) {
   ensureItemState();
-  return !!(st.itemUseLog[item] && st.itemUseLog[item][st.node || '__setup__']);
+  if (!st) return false;
+  const chapterKey = String(chapterNumberForState(st));
+  const chapterLog = st.itemUseChapterLog[item] || {};
+  if (chapterLog[chapterKey] || (st.itemUseLog[item] && st.itemUseLog[item]['chapter:' + chapterKey])) return true;
+  // Совместимость с сохранениями до введения chapter-level журнала.
+  const nodeLog = st.itemUseLog[item] || {};
+  return Object.entries(nodeLog).some(([scope, used]) => {
+    if (!used || scope === '__setup__' || scope.indexOf('chapter:') === 0) return false;
+    let usedChapter = null;
+    if (isPrologueNodeId(scope)) usedChapter = 0;
+    else {
+      const mappedChapter = chapterForNodeId(scope);
+      if (mappedChapter === 'prologue') usedChapter = 0;
+      else if (mappedChapter != null && Number.isFinite(Number(mappedChapter))) usedChapter = Number(mappedChapter);
+      else {
+        const match = String(scope).match(/^c(\d+)_/i);
+        if (match) usedChapter = Number(match[1]);
+      }
+    }
+    return usedChapter === Number(chapterKey);
+  });
 }
 function rememberItemUse(item) {
   ensureItemState();
   if (!st.itemUseLog[item]) st.itemUseLog[item] = {};
+  if (!st.itemUseChapterLog[item]) st.itemUseChapterLog[item] = {};
+  const chapterKey = String(chapterNumberForState(st));
+  st.itemUseLog[item]['chapter:' + chapterKey] = true;
+  st.itemUseChapterLog[item][chapterKey] = true;
   st.itemUseLog[item][st.node || '__setup__'] = true;
 }
 function consumeSkillBuff(skill) {
@@ -4353,9 +4411,11 @@ function activateItem(item) {
     if (!canApply) { add("sys", "[ИНВЕНТАРЬ: «" + item + "» пока не требуется — соответствующие ресурсы уже восстановлены]"); save(); return false; }
     sfx.click();
     removeInventoryItem(item, false);
-    add("sys", "[ИНВЕНТАРЬ: Активирован предмет «" + item + "»]");
+    add("sys", "[ИНВЕНТАРЬ: Предмет «" + item + "» использован и потрачен]");
     effects.forEach(([key, amount]) => { if (amount > 0) res(key, amount); });
-    status(); save(); return true;
+    status(); save();
+    closeModal(true);
+    return true;
   }
 
   if (fx.kind === "equipment") {
@@ -4373,8 +4433,10 @@ function activateItem(item) {
     return true;
   }
 
-  if (fx.reusePerNode && usedItemInNode(item)) {
-    add("sys", "[ИНВЕНТАРЬ: «" + item + "» уже активирован в этой сцене]"); save(); return false;
+  const chapterCooldown = itemHasChapterCooldown(fx);
+  if (chapterCooldown && usedItemInNode(item)) {
+    add("sys", "[ИНВЕНТАРЬ: «" + item + "» уже использован в этой главе. Предмет перезарядится в следующей главе]");
+    save(); return false;
   }
   const skillsToGrant = (fx.skills || []).filter(skill => !st.skills.includes(skill));
   if (fx.consume && (fx.skills || []).length && !skillsToGrant.length) {
@@ -4382,16 +4444,15 @@ function activateItem(item) {
   }
 
   sfx.click();
-  if (fx.reusePerNode) rememberItemUse(item);
+  if (chapterCooldown) rememberItemUse(item);
   if (fx.consume) removeInventoryItem(item, false);
   skillsToGrant.forEach(skill => {
     if (!st.itemBuffs.includes(skill)) st.itemBuffs.push(skill);
-    // Сцено-ограниченный инструмент истекает при переходе из текущего узла.
-    // Разовый расходник остаётся активным до первой подходящей проверки.
+    // Сцено-ограниченная поддержка навыка заканчивается при переходе из текущего узла.
     if (fx.reusePerNode) {
       if (!st.itemBuffExpiries[skill] || st.itemBuffExpiries[skill].scene !== null) st.itemBuffExpiries[skill] = {scene: st.node};
     } else {
-      st.itemBuffExpiries[skill] = {scene: null};
+      st.itemBuffExpiries[skill] = {scene:null};
     }
   });
   if (fx.addFlags) recordFlags(fx.addFlags);
@@ -4403,10 +4464,18 @@ function activateItem(item) {
     const hint = firstText ? fill(String(firstText)).replace(/\s+/g, " ").slice(0, 210) : "В этой сцене пока нет новой записи.";
     extra = " Запись на полях: «" + hint + (firstText && String(firstText).length > 210 ? "…" : "") + "»";
   }
-  add("sys", "[ИНВЕНТАРЬ: «" + item + "» активирован. Поддержка навыков: " + (fx.skills || []).join(", ") + "." + extra + "]");
+  const chapterNo = chapterNumberForState(st);
+  const activationState = fx.consume ? "использован и потрачен" : (chapterCooldown ? "использован в главе " + chapterNo + " и перезарядится в следующей главе" : "активирован");
+  add("sys", "[ИНВЕНТАРЬ: «" + item + "» " + activationState + ". Поддержка навыков: " + (fx.skills || []).join(", ") + "." + extra + "]");
   status(); save();
-  // Если выборы уже открыты, сразу обновляем их: предметная поддержка открывает подходящие варианты.
-  if (st.queue.length === 0 && $("#wait").hidden && holdRun !== run && $("#chs").querySelector("button.ch")) choices(STORY_DATA.nodes[st.node]);
+  // После успешной активации возвращаем игрока к чтению и закрываем модальное окно.
+  closeModal(true);
+  // Если выборы уже открыты, обновляем их до возврата фокуса: предметная поддержка
+  // может разблокировать вариант, который ранее был недоступен.
+  if (st.queue.length === 0 && $("#wait").hidden && holdRun !== run && $("#chs").children.length) {
+    choices(STORY_DATA.nodes[st.node]);
+    restoreStoryControlsFocus();
+  }
   return true;
 }
 function useItem(item) { return activateItem(item); }
@@ -4421,17 +4490,28 @@ function showInv() {
       const name = el("b", item); name.className = "inv-name"; card.append(name);
       if (fx) {
         card.append(el("p", fx.description || fx.hint || "Предмет без дополнительного описания."));
-        let stateText = fx.kind === "equipment" ? (st.equipment[fx.equipKey || item] ? "Надето" : "Можно надеть") : (fx.consume ? "Одноразовый предмет" : (fx.reusePerNode && usedItemInNode(item) ? "Уже активирован в этой сцене" : "Готов к активации"));
+        const chapterUsed = itemHasChapterCooldown(fx) && usedItemInNode(item);
+        let stateText = fx.kind === "equipment" ? (st.equipment[fx.equipKey || item] ? "Надето" : "Можно надеть") :
+          (fx.consume ? "Одноразовый предмет" : (chapterUsed ? "Использован в этой главе (перезарядится в следующей)" : "Готов к активации"));
         const state = el("small", stateText); state.className = "inv-state"; card.append(state);
-        const label = fx.kind === "restore" ? "Использовать" : fx.kind === "equipment" ? (st.equipment[fx.equipKey || item] ? "Снять" : "Надеть") : "Активировать";
-        const b = el("button", label + (fx.hint ? " · " + fx.hint : ""));
+        const label = fx.kind === "restore" ? "Использовать" : fx.kind === "equipment" ? (st.equipment[fx.equipKey || item] ? "Снять" : "Надеть") : (chapterUsed ? "Использован" : "Активировать");
+        const b = el("button", label + (!chapterUsed && fx.hint ? " · " + fx.hint : ""));
         b.type = "button";
-        if (fx.reusePerNode && usedItemInNode(item)) b.disabled = true;
+        if (chapterUsed) {
+          b.disabled = true;
+          b.title = "Предмет уже активирован в текущей главе и перезарядится при переходе к следующей";
+          b.setAttribute("aria-label", item + ": использован в этой главе");
+        }
         if (fx.kind === "restore") {
           const noRoom = (!fx.hp || st.hp >= R.hp.max) && (!fx.o2 || st.o2 >= R.o2.max) && (!fx.energy || st.en >= R.en.max);
           if (noRoom) { b.disabled = true; b.title = "Ресурсы уже восстановлены"; }
         }
-        b.onclick = () => { const ok = activateItem(item); if (ok) showInv(); else if (index >= st.inv.length || !st.inv.includes(item)) showInv(); };
+        b.onclick = () => {
+          if (b.disabled) return;
+          const ok = activateItem(item);
+          if (ok && fx.kind === "equipment") showInv();
+          else if (!ok && (index >= st.inv.length || !st.inv.includes(item))) showInv();
+        };
         card.append(b);
       } else {
         card.append(el("p", "Описание этого предмета отсутствует. Он сохранён в инвентаре, но требует регистрации действия в каталоге."));
@@ -4477,10 +4557,43 @@ function pick(c) {
 }
 
 /* --- окна --- */
+function restoreStoryControlsFocus() {
+  const focusStoryControl = () => {
+    const overlay = $("#modal");
+    if (overlay && overlay.classList.contains("on")) return;
+    const box = $("#chs"), bot = $("#bot"), header = $("#chh"), wait = $("#wait");
+    if (!box) return;
+    const moreButton = box.querySelector("button.more:not(:disabled)");
+    const inspectButton = box.querySelector("button.inspect-btn:not(:disabled)");
+    const choiceButton = box.querySelector("button.ch:not(:disabled)");
+    const otherAction = box.querySelector("button:not(:disabled)");
+    let target = moreButton || inspectButton || choiceButton || otherAction;
+    if (target && bot && bot.classList.contains("choices-collapsed")) setChoicePanelCollapsed(false);
+    if (!target && header && !header.hidden && !header.disabled) target = header;
+    if (!target && wait && !wait.hidden) target = wait;
+    if (!target) target = $("#chat");
+    if (target && typeof target.focus === "function") {
+      try { target.focus({preventScroll:true}); } catch (e) { try { target.focus(); } catch (ignore) {} }
+    }
+  };
+  requestAnimationFrame(() => {
+    focusStoryControl();
+    setTimeout(focusStoryControl, 80);
+  });
+}
+function closeModal(restoreFocus = false) {
+  const overlay = $("#modal");
+  if (!overlay) return;
+  overlay.classList.remove("on");
+  overlay.setAttribute("aria-hidden", "true");
+  // CSS отключает pointer-events у закрытого оверлея; сбрасываем inline-переопределения старых модалок.
+  overlay.style.pointerEvents = "";
+  if (restoreFocus) restoreStoryControlsFocus();
+}
 function modal(fn, close = true, cls = "") {
   const overlay = $("#modal"), m = $("#mb");
   m.className = cls; m.innerHTML = ""; fn(m);
-  if (close) { const b = el("button", "Закрыть"); b.type = "button"; b.onclick = () => { overlay.classList.remove("on"); overlay.setAttribute("aria-hidden", "true"); }; m.append(b); }
+  if (close) { const b = el("button", "Закрыть"); b.type = "button"; b.onclick = () => closeModal(true); m.append(b); }
   overlay.setAttribute("aria-hidden", "false"); overlay.classList.add("on");
 }
 
@@ -4619,7 +4732,7 @@ async function death(my) {
 function askDrop(item) {
   return new Promise(res => modal(m => {
     m.append(el("h3", "ИНВЕНТАРЬ НАПАРНИКА ПЕРЕПОЛНЕН"), el("p", "Новый предмет: «" + item + "». Что выбросить?"));
-    const done = () => { st.pend.shift(); status(); save(); $("#modal").classList.remove("on"); res(); };
+    const done = () => { st.pend.shift(); status(); save(); closeModal(true); res(); };
     st.inv.forEach((it, i) => { const b = el("button", "Выбросить: " + it); b.onclick = () => { st.inv.splice(i, 1, item); add("sys", "[ИНВЕНТАРЬ: Выброшен «" + it + "», получен «" + item + "»]"); done(); }; m.append(b); });
     const k = el("button", "Не брать «" + item + "»"); k.onclick = () => { add("sys", "[ИНВЕНТАРЬ: «" + item + "» оставлен]"); done(); }; m.append(k);
   }, false));
@@ -5523,7 +5636,7 @@ function openJournal() {
 }
 $("#bLog").addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); openJournal(); });
 $("#bCall").addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); sfx.click(); openContactChannel(); });
-$("#modal").addEventListener("click", e => { if (e.target === $("#modal")) { $("#modal").classList.remove("on"); $("#modal").setAttribute("aria-hidden", "true"); } });
+$("#modal").addEventListener("click", e => { if (e.target === $("#modal")) closeModal(true); });
 
 // Абсолютные дедлайны переживают закрытие вкладки: при возвращении браузер
 // немедленно сверяет время, а не запускает ожидание заново.
