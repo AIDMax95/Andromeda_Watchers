@@ -155,11 +155,47 @@ body {
 #bLog { position: relative; z-index: 5; flex: 0 0 40px; min-width: 40px; min-height: 36px; display: inline-flex; align-items: center; justify-content: center; touch-action: manipulation; }
 .journal-badge { position: absolute; top: -5px; right: -5px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 10px; background: var(--rd); color: #160710; font: 700 10px/16px ui-monospace,monospace; text-align: center; box-shadow: 0 0 0 2px var(--pn); }
 #game #chs {
-  max-height: none !important; overflow: visible; overscroll-behavior: auto;
-  scroll-snap-type: none; scrollbar-width: none;
+  max-height: min(220px, 32vh) !important;
+  max-height: min(220px, 32dvh) !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  scroll-snap-type: none;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(135, 176, 220, .72) rgba(255,255,255,.035);
+  padding: 1px 3px 5px 1px;
 }
-#game #chs::-webkit-scrollbar { display: none; }
+#game #chs::-webkit-scrollbar { display:block; width:6px; }
+#game #chs::-webkit-scrollbar-track { background:rgba(255,255,255,.035); border-radius:8px; }
+#game #chs::-webkit-scrollbar-thumb { background:linear-gradient(180deg,#8fb8ffb8,#6e8fb7a0); border-radius:8px; border:1px solid rgba(5,10,20,.35); }
+#game #chs::-webkit-scrollbar-thumb:hover { background:#b5d2f4; }
 #game #chs button { flex: 0 0 auto; }
+#game > #bot.choices-collapsed { gap:0; padding-top:8px; padding-bottom:calc(8px + env(safe-area-inset-bottom, 0px)); }
+#game > #bot.choices-collapsed #chs { display:none !important; }
+#game #chh {
+  width:100%; min-height:36px; margin:0; padding:8px 12px;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  border:1px solid rgba(137,177,220,.38); border-left:3px solid #8fb8ff;
+  border-radius:8px; background:linear-gradient(100deg,#17263a,#111c2c 70%,#101827);
+  color:#d9e8fb; font:700 11px/1.35 Oswald,sans-serif; letter-spacing:.13em;
+  text-align:left; cursor:pointer; touch-action:manipulation;
+  box-shadow:inset 0 1px 0 #ffffff0b,0 2px 9px #0003;
+}
+#game #chh::after {
+  content:"▲"; flex:0 0 auto; color:#9fc9f5; font:700 14px/1 ui-monospace,monospace;
+  text-shadow:0 0 9px #78baff77;
+}
+#game #chh[aria-expanded="false"]::after { content:"▼"; }
+#game #chh:active:not(:disabled) { border-color:#b8d8fa; background:linear-gradient(100deg,#223c59,#172a40); }
+#game #chh:focus-visible { outline:2px solid #a9cefa; outline-offset:2px; }
+#game #chh.is-hint { justify-content:center; text-align:center; cursor:default; border-color:rgba(137,177,220,.2); border-left-color:rgba(137,177,220,.3); color:#9fb2c8; }
+#game #chh.is-hint::after { display:none; }
+#game #chh.is-hint:disabled { opacity:1; }
+@media (max-height:560px) {
+  #game #chs { max-height:min(180px, 34dvh) !important; }
+}
 
 /* --- Пролог появляется полностью сразу; длинный текст прокручивается внутри --- */
 #prologue .in {
@@ -329,12 +365,13 @@ body {
   pointer-events: none;
 }
 #game #chh {
-  display: block;
-  color: #c5d8f2;
-  font: 700 11px/1.35 Oswald, sans-serif;
-  letter-spacing: .13em;
-  text-align: left;
-  padding: 1px 4px 2px;
+  width:100%; min-height:36px; margin:0; padding:8px 12px;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  border:1px solid rgba(137,177,220,.38); border-left:3px solid #8fb8ff;
+  border-radius:8px; background:linear-gradient(100deg,#17263a,#111c2c 70%,#101827);
+  color:#d9e8fb; font:700 11px/1.35 Oswald,sans-serif; letter-spacing:.13em;
+  text-align:left; cursor:pointer; touch-action:manipulation;
+  box-shadow:inset 0 1px 0 #ffffff0b,0 2px 9px #0003;
 }
 #game #chh[hidden] { display: none !important; }
 #game #chs { gap: 8px; }
@@ -451,8 +488,7 @@ body {
   border-left:3px solid #82c5d7; border-radius:9px;
   background:linear-gradient(115deg,rgba(35,69,83,.42),rgba(22,39,55,.56) 62%,rgba(22,28,48,.58));
   box-shadow:inset 0 1px 0 #ffffff0b,0 2px 12px #5bbbd31a;
-  max-height:26vh; overflow-y:auto; overscroll-behavior:contain;
-  scrollbar-width:thin; scrollbar-color:#628d9b55 transparent;
+  max-height:none; overflow:visible; overscroll-behavior:visible;
 }
 #game #chs .inspect-heading {
   color:#b9e7ef; font:700 11px/1.35 Oswald,sans-serif;
@@ -525,7 +561,7 @@ body {
   <div class="pg" id="pg"></div>
  </div>
  <div class="cred" id="credG"></div><div id="chat"></div><div id="typ"></div>
- <div id="bot"><div id="wait" hidden></div><div id="chh" hidden></div><div id="chs"></div></div>
+ <div id="bot"><div id="wait" hidden></div><button id="chh" type="button" hidden aria-expanded="true" aria-controls="chs" title="Свернуть список действий">ВАШ ВЫБОР / ДЕЙСТВИЕ:</button><div id="chs"></div></div>
 </div>
 <div id="final" class="scr"><div id="fn"></div></div>
 <div id="modal" aria-hidden="true"><div id="mb" role="dialog" aria-modal="true" aria-label="Окно игры"></div></div>
@@ -3858,7 +3894,7 @@ const chunkSizes = n => { const k = Math.ceil(n / 3), b = Math.floor(n / k), e =
 function focusChunk(e) { const c = $("#chat"); if (!e || !e.isConnected) return; const t = e.getBoundingClientRect().top - c.getBoundingClientRect().top; if (t < 0) c.scrollTop += t - 8; }
 function more(my) {
   return new Promise(res => {
-    holdRun = my; const box = $("#chs"), c = $("#chat"); box.innerHTML = ""; box.style.maxHeight = ""; $("#chh").hidden = true;
+    holdRun = my; const box = $("#chs"), c = $("#chat"); box.innerHTML = ""; $("#chh").hidden = true; $("#chh").disabled = false; $("#chh").classList.remove("is-hint"); setChoicePanelCollapsed(false);
     let done = false;
     const go = () => {
       if (done || my !== run || (window.getSelection && String(window.getSelection()))) return;
@@ -3885,7 +3921,7 @@ function deliverIncomingCall(node) {
 }
 
 async function pump(options = {}) {
-  const my = ++run; skip = false; $("#chat").onclick = null; let first = null, hasParagraph = false; modeBtn(); status(); $("#chs").innerHTML = ""; $("#chs").style.maxHeight = ""; $("#chh").hidden = true; $("#wait").hidden = true;
+  const my = ++run; skip = false; $("#chat").onclick = null; let first = null, hasParagraph = false; modeBtn(); status(); $("#chs").innerHTML = ""; $("#chh").hidden = true; $("#chh").disabled = false; $("#chh").classList.remove("is-hint"); setChoicePanelCollapsed(false); $("#wait").hidden = true;
   while (st.pend.length) { await askDrop(st.pend[0]); if (my !== run) return; }
   while (st.queue.length && !st.dead) {
     const q = st.queue[0];
@@ -3954,11 +3990,16 @@ async function pump(options = {}) {
     if (!waitResult.skipped) notifyReady(n);
   } else if (hasParagraph && n.choices && n.choices.length && st.mode !== "fast" && !options.resume) {
     const hint = $("#chh");
+    setChoicePanelCollapsed(false);
     hint.textContent = "Варианты выбора появятся автоматически через 5 секунд";
+    hint.disabled = true;
+    hint.classList.add("is-hint");
     hint.hidden = false;
     await sleep(5000);
     if (my !== run) return;
     hint.hidden = true;
+    hint.disabled = false;
+    hint.classList.remove("is-hint");
   }
   // Входящий вызов звучит после авторской паузы ожидания и до выбора игрока.
   deliverIncomingCall(n);
@@ -4239,13 +4280,32 @@ function scrollChatToBottom(force = false) {
     if (force || c.scrollHeight - c.clientHeight - c.scrollTop <= 28) c.scrollTop = c.scrollHeight;
   });
 }
+function setChoicePanelCollapsed(collapsed, resetScroll = false) {
+  const bot = $("#bot"), header = $("#chh"), list = $("#chs");
+  if (!bot || !header || !list) return;
+  const isCollapsed = !!collapsed;
+  bot.classList.toggle("choices-collapsed", isCollapsed);
+  header.setAttribute("aria-expanded", String(!isCollapsed));
+  header.setAttribute("aria-controls", "chs");
+  header.title = isCollapsed ? "Развернуть список осмотров и действий" : "Свернуть список осмотров и действий";
+  if (resetScroll) {
+    list.scrollTop = 0;
+    requestAnimationFrame(() => {
+      if (!bot.classList.contains("choices-collapsed")) list.scrollTop = 0;
+    });
+  }
+}
 function fitChoices() {
-  // Варианты остаются в закреплённом нижнем блоке; скроллится только книга.
+  // Внутри нижней панели прокручивается общий список осмотров и сюжетных действий.
+  // При появлении нового набора панель автоматически раскрывается и показывает его начало.
   const box = $("#chs"), h = $("#chh");
-  box.style.maxHeight = ""; box.style.overflowY = "visible"; box.onscroll = null;
-  const hasCards = !!box.querySelector("button.ch");
+  const hasActions = !!box.querySelector("button.ch, button.inspect-btn, .response-deadline");
   h.textContent = "ВАШ ВЫБОР / ДЕЙСТВИЕ:";
-  h.hidden = !hasCards;
+  h.disabled = false;
+  h.classList.remove("is-hint");
+  h.hidden = !hasActions;
+  if (hasActions) setChoicePanelCollapsed(false, true);
+  else setChoicePanelCollapsed(false);
 }
 function endBtn(preserveContent = false) {
   const box = $("#chs"); if (!preserveContent) box.innerHTML = "";
@@ -4565,6 +4625,14 @@ function askDrop(item) {
   }, false));
 }
 $("#bInv").onclick = showInv;
+$("#chh").addEventListener("click", e => {
+  e.preventDefault(); e.stopPropagation();
+  const header = $("#chh");
+  if (header.disabled || header.hidden || !$("#chs").children.length) return;
+  const collapsed = !$("#bot").classList.contains("choices-collapsed");
+  setChoicePanelCollapsed(collapsed);
+  if (!collapsed) requestAnimationFrame(() => { $("#chs").scrollTop = 0; });
+});
 $("#chat").onclick = () => { if (st && st.queue && st.queue.length && st.mode !== "fast") skip = true; };
 function modeBtn() { $("#bMode").textContent = st.mode === "fast" ? "⚡" : "⏱"; $("#bMode").title = st.mode === "fast" ? "Быстрый темп (нажмите: реалистичный)" : "Реалистичный темп (нажмите: быстрый)"; }
 $("#bMode").onclick = () => { st.mode = st.mode === "fast" ? "real" : "fast"; modeBtn(); save(); };
