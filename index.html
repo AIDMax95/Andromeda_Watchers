@@ -29,6 +29,18 @@ input{width:100%;font:inherit;color:var(--tx);background:var(--pn);border:1px so
 #modal{position:fixed;inset:0;background:#000c;display:none;align-items:center;justify-content:center;padding:16px;z-index:10000;pointer-events:none;touch-action:manipulation}#modal.on{display:flex;pointer-events:auto}
 #mb{background:var(--pn);border:1px solid var(--ln);border-radius:12px;padding:14px;width:100%;max-width:460px;max-height:min(82dvh,760px);overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:8px}
 #mb h3{margin:0;color:var(--ac);font-size:15px}#mb p{margin:0;color:var(--dim)}#mb.dead h3{color:var(--rd);font-size:18px}
+/* Комфортное чтение на узком экране: не растягивать пробелы и не разрывать слова. */
+#game .m.nar, #game .m.spk, #game .m.spk.speech-hero, #game .m.spk.speech-npc,
+#prologue #pr .pp, .book-text, .msg, .speech-hero, .speech-npc {
+  text-align: left !important;
+  hyphens: none !important;
+  -webkit-hyphens: none !important;
+  word-spacing: normal !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+}
+#game > #chat { overflow-anchor: none; }
+
 /* Интерактивное оглавление журнала */
 .toc{display:flex;flex-direction:column;gap:5px;max-height:42vh;min-height:0;flex:0 0 auto;overflow:auto;padding-right:3px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .toc-item{display:flex;align-items:center;gap:9px;width:100%;padding:9px 10px;border:1px solid var(--ln);background:#090d19;text-align:left}
@@ -85,7 +97,7 @@ button.big{background:var(--ac);color:#07102a;font-weight:700;border:0;text-alig
 #pr{max-width:440px}.pp{font:italic 17px/1.7 Lora,Georgia,serif;color:#c3d6e2;opacity:0;animation:fi 1.4s forwards;margin:0 0 14px}
 #prGo.pp{font:700 15px Oswald,sans-serif;font-style:normal;color:#07102a}
 /* --- книжная вёрстка: абзацы, прямая речь, разделитель сцен --- */
-.m.nar,.m.spk{align-self:stretch;max-width:100%;background:none;border:0;border-radius:0;padding:0 2px;font:400 16px/1.75 Lora,Georgia,serif;color:#c3d0ee;text-align:justify;text-indent:1.6em;hyphens:auto;-webkit-hyphens:auto;overflow-wrap:anywhere}
+.m.nar,.m.spk{align-self:stretch;max-width:100%;background:none;border:0;border-radius:0;padding:0 2px;font:400 16px/1.75 Lora,Georgia,serif;color:#c3d0ee;text-align:left;text-indent:1.6em;hyphens:none;-webkit-hyphens:none;word-spacing:normal;overflow-wrap:normal;word-break:normal}
 .m.spk{color:#e8eeff}.m.spk .dash{color:var(--am);font-weight:600}
 .m.nar+.m.nar,.m.nar+.m.spk,.m.spk+.m.nar,.m.spk+.m.spk{margin-top:-5px}
 .m.hd+.m.nar,.m.hd+.m.spk,.m.sep+.m.nar,.m.sep+.m.spk{text-indent:0}
@@ -151,8 +163,8 @@ body {
   -webkit-overflow-scrolling: touch; scroll-behavior: smooth;
 }
 #game > #bot { flex-shrink: 0; overflow: visible; }
-#top { position: relative; z-index: 4; }
-#bLog { position: relative; z-index: 5; flex: 0 0 40px; min-width: 40px; min-height: 36px; display: inline-flex; align-items: center; justify-content: center; touch-action: manipulation; }
+#top { position: relative; z-index: 40; isolation: isolate; }
+#bLog { position: relative; z-index: 55; flex: 0 0 40px; min-width: 40px; min-height: 36px; display: inline-flex; align-items: center; justify-content: center; touch-action: manipulation; pointer-events: auto !important; }
 .journal-badge { position: absolute; top: -5px; right: -5px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 10px; background: var(--rd); color: #160710; font: 700 10px/16px ui-monospace,monospace; text-align: center; box-shadow: 0 0 0 2px var(--pn); }
 #game #chs {
   max-height: min(220px, 32vh) !important;
@@ -188,6 +200,9 @@ body {
   text-shadow:0 0 9px #78baff77;
 }
 #game #chh[aria-expanded="false"]::after { content:"▼"; }
+@keyframes choicePanelReveal { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+#game #chh.choice-reveal { animation:choicePanelReveal .38s ease-out both; }
+@media (prefers-reduced-motion: reduce) { #game #chh.choice-reveal { animation:none; } }
 #game #chh:active:not(:disabled) { border-color:#b8d8fa; background:linear-gradient(100deg,#223c59,#172a40); }
 #game #chh:focus-visible { outline:2px solid #a9cefa; outline-offset:2px; }
 #game #chh.is-hint { justify-content:center; text-align:center; cursor:default; border-color:rgba(137,177,220,.2); border-left-color:rgba(137,177,220,.3); color:#9fb2c8; }
@@ -210,7 +225,7 @@ body {
 #prologue .pp { opacity: 1; animation: none; }
 #prologue #pr .pp {
   font: italic 16px/1.75 Lora, Georgia, serif; color: #c3d6e2;
-  text-align: justify; text-indent: 1.4em; margin: 0 0 14px;
+  text-align: left; hyphens: none; -webkit-hyphens: none; word-spacing: normal; overflow-wrap: normal; word-break: normal; text-indent: 1.4em; margin: 0 0 14px;
 }
 #prologue #prGo {
   opacity: 1; animation: none; align-self: center; margin: 10px auto 0;
@@ -519,8 +534,8 @@ body {
 .t2-observer small{color:#9d94ba;font-size:10px;line-height:1.5}
 
 /* --- Журнал улик и самостоятельный канал связи --- */
-.journal-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;position:sticky;top:-14px;z-index:5;padding:5px 0;background:var(--pn)}
-.journal-tab{font-size:12px;text-align:center;padding:9px 7px;border-color:#2b3859;background:#090e1a;color:#aebbdc}
+.journal-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;position:sticky;top:-14px;z-index:5;padding:5px 0;background:var(--pn)}
+.journal-tab{min-width:0;font-size:clamp(9px,2.8vw,12px);line-height:1.25;text-align:center;padding:8px 4px;border-color:#2b3859;background:#090e1a;color:#aebbdc;white-space:normal}
 .journal-tab.active{border-color:var(--ac);background:#17233a;color:#e5edff;box-shadow:inset 0 -2px var(--ac)}
 .journal-pane[hidden]{display:none!important}
 .clue-entry{display:flex;flex-direction:column;gap:5px;padding:10px;border:1px solid #36415f;border-left:3px solid var(--am);border-radius:8px;background:linear-gradient(145deg,#17152a,#0a0e1a)}
@@ -2919,8 +2934,8 @@ function draw(m, emptyText = false, options = {}) {
   else { if (m.k === "in") d.append(el("b", m.f || st.hero)); textNode = document.createTextNode(emptyText ? "" : m.t); d.append(textNode); }
   const c = $("#chat");
   const wasNearBottom = c.scrollHeight - c.clientHeight - c.scrollTop <= 28;
-  c.append(d);
-  if (options.autoScroll !== false && wasNearBottom) c.scrollTop = c.scrollHeight;
+  c.appendChild(d);
+  if (options.autoScroll !== false && preserveChatScrollRun !== run && wasNearBottom) c.scrollTop = c.scrollHeight;
   return { element: d, textNode };
 }
 function makeTranscriptRecord(k, t, bad, x) {
@@ -3960,19 +3975,31 @@ Object.assign(STORY_DATA.meta.flagNames, {
 
 /* --- постраничная подача длинных сцен --- */
 let holdRun = 0; /* == run, пока выбор намеренно скрыт: ждём «Читать дальше» или конец страницы */
+let preserveChatScrollRun = 0; /* текущая сцена дописывает текст ниже, не двигая позицию читателя */
 const isPar = q => q.k !== "hd" && q.k !== "sep";
 const chunkSizes = n => { const k = Math.ceil(n / 3), b = Math.floor(n / k), e = n % k; return Array.from({ length: k }, (_, i) => b + (i < e ? 1 : 0)); }; /* 4→2+2, 5→3+2, 7→3+2+2 */
-function focusChunk(e) { const c = $("#chat"); if (!e || !e.isConnected) return; const t = e.getBoundingClientRect().top - c.getBoundingClientRect().top; if (t < 0) c.scrollTop += t - 8; }
 function more(my) {
   return new Promise(res => {
-    holdRun = my; const box = $("#chs"), c = $("#chat"); box.innerHTML = ""; $("#chh").hidden = true; $("#chh").disabled = false; $("#chh").classList.remove("is-hint"); setChoicePanelCollapsed(false);
+    holdRun = my;
+    const box = $("#chs"), c = $("#chat");
+    box.innerHTML = ""; $("#chh").hidden = true; $("#chh").disabled = false; $("#chh").classList.remove("is-hint", "choice-reveal");
+    setChoicePanelCollapsed(false);
     let done = false;
     const go = () => {
       if (done || my !== run || (window.getSelection && String(window.getSelection()))) return;
+      const savedScrollTop = c.scrollTop;
+      const previousScrollBehavior = c.style.scrollBehavior;
       done = true; c.onclick = null; box.innerHTML = ""; holdRun = 0;
+      preserveChatScrollRun = my;
+      c.style.scrollBehavior = "auto";
+      c.scrollTop = savedScrollTop;
+      requestAnimationFrame(() => {
+        if (my === run) c.scrollTop = savedScrollTop;
+        c.style.scrollBehavior = previousScrollBehavior;
+      });
       commitReadChars(); sfx.page(); res();
     };
-    const b = el("button", "Читать дальше..."); b.className = "more"; b.onclick = go; c.onclick = go; box.append(b); scrollChatToBottom(); try { b.focus({ preventScroll: true }); } catch (e) {}
+    const b = el("button", "Читать дальше..."); b.className = "more"; b.type = "button"; b.onclick = go; c.onclick = go; box.append(b);
   });
 }
 function deliverIncomingCall(node) {
@@ -3992,7 +4019,7 @@ function deliverIncomingCall(node) {
 }
 
 async function pump(options = {}) {
-  const my = ++run; skip = false; $("#chat").onclick = null; let first = null, hasParagraph = false; modeBtn(); status(); $("#chs").innerHTML = ""; $("#chh").hidden = true; $("#chh").disabled = false; $("#chh").classList.remove("is-hint"); setChoicePanelCollapsed(false); $("#wait").hidden = true;
+  const my = ++run; if (preserveChatScrollRun !== my) preserveChatScrollRun = 0; skip = false; $("#chat").onclick = null; let hasParagraph = false; modeBtn(); status(); $("#chs").innerHTML = ""; $("#chh").hidden = true; $("#chh").disabled = false; $("#chh").classList.remove("is-hint"); setChoicePanelCollapsed(false); $("#wait").hidden = true;
   while (st.pend.length) { await askDrop(st.pend[0]); if (my !== run) return; }
   while (st.queue.length && !st.dead) {
     const q = st.queue[0];
@@ -4000,7 +4027,6 @@ async function pump(options = {}) {
     const cnt = isPar(q);
     if (cnt) hasParagraph = true;
     if (st.paged && st.pgLeft <= 0 && st.queue.some(isPar)) {
-      focusChunk(first); first = null;
       await more(my);
       if (my !== run) return;
       st.pgLeft = st.pgSizes.shift() || 3; save();
@@ -4030,7 +4056,6 @@ async function pump(options = {}) {
       st.paragraphsShownInNode = Math.max(0, Number(st.paragraphsShownInNode) || 0) + 1;
       if (st.paged) st.pgLeft--;
     }
-    if (!first) first = $("#chat").lastElementChild;
     st.nextAt = 0; save();
     if (cnt && st.mode === "fast") await sleep(0);
     else if (!cnt) await sleep(40);
@@ -4059,21 +4084,20 @@ async function pump(options = {}) {
     st.waitMode = null;
     save();
     if (!waitResult.skipped) notifyReady(n);
-  } else if (hasParagraph && n.choices && n.choices.length && st.mode !== "fast" && !options.resume) {
+  }
+  // Входящий вызов тоже является частью текста сцены: сначала показываем его, затем даём время дочитать.
+  deliverIncomingCall(n);
+  // После окончания всего текста даём пять секунд на чтение.
+  // В это время список действий скрыт; затем fitChoices покажет только компактную свёрнутую плашку.
+  if ((hasParagraph || n.incomingCall) && ((n.choices && n.choices.length) || (n.inspects && n.inspects.length)) && !options.resume) {
     const hint = $("#chh");
-    setChoicePanelCollapsed(false);
-    hint.textContent = "Варианты выбора появятся автоматически через 5 секунд";
-    hint.disabled = true;
-    hint.classList.add("is-hint");
-    hint.hidden = false;
-    await sleep(5000);
-    if (my !== run) return;
     hint.hidden = true;
     hint.disabled = false;
-    hint.classList.remove("is-hint");
+    hint.classList.remove("is-hint", "choice-reveal");
+    setChoicePanelCollapsed(true);
+    await sleep(5000);
+    if (my !== run) return;
   }
-  // Входящий вызов звучит после авторской паузы ожидания и до выбора игрока.
-  deliverIncomingCall(n);
   if (n.isEnding) { commitReadChars(); endBtn(); await sleep(st.mode === "fast" ? 500 : 2000); if (my !== run) return; return showFinal(false); }
   if (!n.choices || !n.choices.length) commitReadChars();
   choices(n);
@@ -4344,6 +4368,7 @@ function choices(n) {
 }
 
 function scrollChatToBottom(force = false) {
+  if (preserveChatScrollRun === run) return;
   const c = $("#chat");
   const wasNearBottom = c.scrollHeight - c.clientHeight - c.scrollTop <= 28;
   if (!force && !wasNearBottom) return;
@@ -4367,16 +4392,20 @@ function setChoicePanelCollapsed(collapsed, resetScroll = false) {
   }
 }
 function fitChoices() {
-  // Внутри нижней панели прокручивается общий список осмотров и сюжетных действий.
-  // При появлении нового набора панель автоматически раскрывается и показывает его начало.
+  // Список всегда появляется свёрнутым: игрок сам раскрывает осмотры и варианты ответа.
   const box = $("#chs"), h = $("#chh");
-  const hasActions = !!box.querySelector("button.ch, button.inspect-btn, .response-deadline");
+  const hasActions = !!box.querySelector("button.ch, button.inspect-btn, .response-deadline, button:not(.more)");
   h.textContent = "ВАШ ВЫБОР / ДЕЙСТВИЕ:";
   h.disabled = false;
-  h.classList.remove("is-hint");
+  h.classList.remove("is-hint", "choice-reveal");
   h.hidden = !hasActions;
-  if (hasActions) setChoicePanelCollapsed(false, true);
-  else setChoicePanelCollapsed(false);
+  if (hasActions) {
+    setChoicePanelCollapsed(true, true);
+    void h.offsetWidth;
+    h.classList.add("choice-reveal");
+  } else {
+    setChoicePanelCollapsed(false);
+  }
 }
 function endBtn(preserveContent = false) {
   const box = $("#chs"); if (!preserveContent) box.innerHTML = "";
@@ -4581,7 +4610,7 @@ function restoreStoryControlsFocus() {
     const choiceButton = box.querySelector("button.ch:not(:disabled)");
     const otherAction = box.querySelector("button:not(:disabled)");
     let target = moreButton || inspectButton || choiceButton || otherAction;
-    if (target && bot && bot.classList.contains("choices-collapsed")) setChoicePanelCollapsed(false);
+    if (bot && bot.classList.contains("choices-collapsed") && header && !header.hidden && !header.disabled) target = header;
     if (!target && header && !header.hidden && !header.disabled) target = header;
     if (!target && wait && !wait.hidden) target = wait;
     if (!target) target = $("#chat");
@@ -5405,24 +5434,30 @@ function openJournal() {
   const unseen = new Set(notes.filter(f => !st.journalSeen.includes(f)));
   modal(m => {
     const mainPanel = el("section", ""); mainPanel.className = "journal-pane";
+    const dossierPanel = el("section", ""); dossierPanel.className = "journal-pane"; dossierPanel.hidden = true;
     const cluesPanel = el("section", ""); cluesPanel.className = "journal-pane"; cluesPanel.hidden = true;
     const tabBar = el("div", ""); tabBar.className = "journal-tabs";
     const mainTab = el("button", "📓 Записи"); mainTab.type = "button"; mainTab.className = "journal-tab active";
+    const dossierTab = el("button", "👥 Досье"); dossierTab.type = "button"; dossierTab.className = "journal-tab";
     const cluesTab = el("button", "🔎 Улики и тайны"); cluesTab.type = "button"; cluesTab.className = "journal-tab";
     const activateTab = tab => {
-      const showClues = tab === "clues";
-      mainPanel.hidden = showClues; cluesPanel.hidden = !showClues;
-      mainTab.classList.toggle("active", !showClues);
-      cluesTab.classList.toggle("active", showClues);
-      if (showClues) {
+      mainPanel.hidden = tab !== "main";
+      dossierPanel.hidden = tab !== "dossier";
+      cluesPanel.hidden = tab !== "clues";
+      mainTab.classList.toggle("active", tab === "main");
+      dossierTab.classList.toggle("active", tab === "dossier");
+      cluesTab.classList.toggle("active", tab === "clues");
+      $("#mb").scrollTop = 0;
+      if (tab === "clues") {
         (st.clues || []).forEach(clue => { if (clue) clue.read = true; });
         cluesPanel.querySelectorAll(".journal-note-new").forEach(card => card.classList.remove("journal-note-new"));
         save(); updateJournalBadge();
       }
     };
     mainTab.onclick = () => activateTab("main");
+    dossierTab.onclick = () => activateTab("dossier");
     cluesTab.onclick = () => activateTab("clues");
-    tabBar.append(mainTab, cluesTab);
+    tabBar.append(mainTab, dossierTab, cluesTab);
     mainPanel.append(el("h3", "ЖУРНАЛ НАБЛЮДАТЕЛЯ"));
     mainPanel.append(el("p", STORY_DATA.meta.title + " · " + STORY_DATA.meta.author));
     mainPanel.append(el("p", "Позывной: " + st.hero + " · путь: " + st.arch));
@@ -5430,7 +5465,7 @@ function openJournal() {
     mainPanel.append(el("p", LB.hp + " " + st.hp + "/20 · " + LB.o2 + " " + st.o2 + "% · " + LB.en + " " + st.en + "% · " + LB.ammo + " " + st.ammo));
     mainPanel.append(el("p", pgTxt()));
     mainPanel.append(el("p", "Отдельный раздел «Улики и тайны» собирает все обнаруженные зацепки и позволяет открывать скрытые вопросы персонажам через канал связи."));
-    m.append(tabBar, mainPanel, cluesPanel);
+    m.append(tabBar, mainPanel, dossierPanel, cluesPanel);
     ensureRealtimeState();
     const unreadInbox = st.realtimeInbox.filter(x => !x.read && !x.answered).length;
     mainPanel.append(el("h3", "Входящие сообщения · режим реального времени"));
@@ -5530,14 +5565,14 @@ function openJournal() {
       if (!chapterNodes.length && !rows.length) chapterCard.append(el("small", "Узлы и решения появятся здесь после прохождения соответствующей главы."));
       rows.forEach(d=>{
         const item=el("div",""); item.className="journal-note";
-        itemainPanel.append(el("b", d.node || "Сюжетный узел"));
-        itemainPanel.append(el("p", d.text || "Принятое решение"));
-        if (d.moment && d.moment.text) itemainPanel.append(el("small","Последствие: "+d.moment.text));
+        item.append(el("b", d.node || "Сюжетный узел"));
+        item.append(el("p", d.text || "Принятое решение"));
+        if (d.moment && d.moment.text) item.append(el("small","Последствие: "+d.moment.text));
         const change=el("button", "Изменить решение в этой точке"); change.type="button";
         change.disabled=!isChronicleUnlocked() || !d.snapshot;
         change.textContent=isChronicleUnlocked()?"Изменить решение в этой точке":"Откроется после первого финала";
         change.onclick=()=>rewindDecision(d._index);
-        itemainPanel.append(change); chapterCard.append(item);
+        item.append(change); chapterCard.append(item);
       });
       chapterMap.append(chapterCard);
     }
@@ -5621,7 +5656,8 @@ function openJournal() {
       toc.append(row);
     });
     mainPanel.append(toc);
-    mainPanel.append(el("h3", "Персонажи / Досье"));
+    dossierPanel.append(el("h3", "ДОСЬЕ ПЕРСОНАЖЕЙ"));
+    dossierPanel.append(el("p", "Знакомые персонажи, их роли и факты, открытые по ходу вашей истории."));
     ensureDossierList();
     const dossierList = el("div", ""); dossierList.className = "dossier-list";
     const unlockedDossiers = DOSSIER_DATA.filter(d => st.dossiers.includes(d.id));
@@ -5639,16 +5675,27 @@ function openJournal() {
       }
       dossierList.append(card);
     });
-    mainPanel.append(dossierList);
+    dossierPanel.append(dossierList);
     if (unlockedDossiers.length <= 2) {
       const hint = el("p", "Новые досье будут открываться по мере знакомства с экипажем.");
-      hint.className = "dossier-hint"; mainPanel.append(hint);
+      hint.className = "dossier-hint"; dossierPanel.append(hint);
     }
   });
   st.journalSeen = [...new Set([...st.journalSeen, ...notes])];
   save(); updateJournalBadge();
 }
-$("#bLog").addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); openJournal(); });
+const journalButton = $("#bLog");
+if (journalButton) {
+  journalButton.type = "button";
+  journalButton.setAttribute("aria-haspopup", "dialog");
+  journalButton.setAttribute("aria-controls", "modal");
+  journalButton.onclick = e => {
+    e.preventDefault(); e.stopPropagation();
+    if (!st) return;
+    sfx.click();
+    openJournal();
+  };
+}
 $("#bCall").addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); sfx.click(); openContactChannel(); });
 $("#modal").addEventListener("click", e => { if (e.target === $("#modal")) closeModal(true); });
 
