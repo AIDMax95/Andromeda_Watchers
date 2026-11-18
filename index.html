@@ -638,10 +638,10 @@ window.STORY_DATA = {
     endingTotal: 4, deathEnding: "end_05", start: "p01_01", customHero: { items: ["Дневник наблюдателя"], ammo: 4 },
     pace: { first: [2, 6], msg: [4, 14], narr: [1.5, 3.5] },
     endings: {
-      end_01: { title: "Свободные на Земле", epilogue: "" },
-      end_02: { title: "Посол двух миров", epilogue: "" },
-      end_03: { title: "Возвращение к звёздам", epilogue: "" },
-      end_04: { title: "Тайные стражи Земли", epilogue: "" }
+      end_01: { title: "Жить среди людей", epilogue: "" },
+      end_02: { title: "Хранитель равновесия", epilogue: "" },
+      end_03: { title: "Посол двух галактик", epilogue: "" },
+      end_04: { title: "Мост между звёздами", epilogue: "" }
     },
     deathEpilogue: {
       hp: "Тьма океана сомкнулась, и свет в трещинах Лиор’Саэна медленно угас. Наверху ещё качались чужие огни, но вы больше не могли удержать ни Аэ́рхиса, ни себя.",
@@ -697,7 +697,7 @@ window.STORY_DATA = {
   nodes: {}
  };
 const STORY_DATA = window.STORY_DATA;
-const STORY_NODE_CHAPTER = Object.freeze({"p01_01":"prologue","p01_02":"prologue","p01_03":"prologue","p01_03a":"prologue","p01_03b":"prologue","p01_03c":"prologue","p01_03d":"prologue","p01_04":"prologue","p01_05":"prologue","p01_06":"prologue","p01_07":"prologue","p01_08":"prologue","p01_09":"prologue","c01_01":1,"c01_02":1,"c01_03":1,"c01_03a":1,"c01_03b":1,"c01_03c":1,"c02_01":2,"c02_02":2,"c02_02a":2,"c02_02b":2,"c02_02c_forgive":2,"c02_02c_expose":2,"c02_02c_silent":2,"c02_03":2,"c02_04_hidden":2,"c02_04_detected":2,"c03_01":3,"c03_01a":3,"c03_02":3,"c03_03_clean":3,"c03_03_hard":3,"c03_04":3,"c04_01":4,"c04_01a":4,"c04_02":4,"c04_02a":4,"c04_03":4,"c04_04_clean":4,"c04_04_clash":4,"c05_01":5,"c05_02":5,"c05_03_quiet":5,"c05_03_alarm":5,"c05_04":5,"c06_01":6,"c06_02":6,"c06_02a":6,"c06_03":6,"c06_04_safe":6,"c06_04_spotted":6,"c07_01":7,"c07_02":7,"c07_02a":7,"c07_03":7,"c07_04_clean":7,"c07_04_chaos":7,"c07_05":7,"c08_01":8,"c08_02":8,"c08_02a":8,"c08_03":8,"c08_04_escape":8,"c08_04_ambush":8,"c08_05":8,"c09_01":9,"c09_02":9,"c09_02a":9,"c09_03_clean":9,"c09_03_hard":9,"c09_04":9,"c10_01":10,"c10_01a":10,"c10_02":10,"c10_02a":10,"c10_03":10,"c10_03a":10,"c11_01":11,"c11_02":11,"c11_02a":11,"c11_03":11,"c11_04_clean":11,"c11_04_spotted":11,"c12_01":12,"c12_02":12,"c12_02a":12,"c12_03_saved":12,"c12_03_overload":12,"c12_04":12,"c13_01":13,"c13_02":13,"c13_02a":13,"c13_03":13,"c13_04_clean":13,"c13_04_hard":13,"c14_01":14,"c14_02":14,"c14_02a":14,"c14_03":14,"c14_04_clean":14,"c14_04_hard":14,"c15_01":15,"c15_02":15,"c15_02a":15,"c15_03":15,"c16_01":16,"c16_02":16,"c16_03":16,"c16_04_clean":16,"c16_04_hard":16,"c17_01":17,"c17_02":17,"c17_03_clean":17,"c17_03_hard":17,"c18_01":18,"c18_02":18,"c18_03_clean":18,"c18_03_hard":18,"c19_01":19,"c19_02_earth":19,"c19_02_bridge":19,"c19_02_stars":19,"c19_02_guardian":19,"end_01":19,"end_02":19,"end_03":19,"end_04":19,"c01_03d":1,"c01_03e":1,"c01_03f_calm":1,"c01_03f_alarm":1,"c01_04":1,"c15_04":15});
+const STORY_NODE_CHAPTER = Object.freeze({"p01_01":"prologue","p01_02":"prologue","p01_03":"prologue","p01_03a":"prologue","p01_03b":"prologue","p01_03c":"prologue","p01_03d":"prologue","p01_04":"prologue","p01_05":"prologue","p01_06":"prologue","p01_07":"prologue","p01_08":"prologue","p01_09":"prologue","c01_01":1,"c01_02":1,"c01_03":1,"c01_03a":1,"c01_03b":1,"c01_03c":1,"c02_01":2,"c02_02":2,"c02_02a":2,"c02_02b":2,"c02_02c_forgive":2,"c02_02c_expose":2,"c02_02c_silent":2,"c02_03":2,"c02_04_hidden":2,"c02_04_detected":2,"c03_01":3,"c03_01a":3,"c03_02":3,"c03_03_clean":3,"c03_03_hard":3,"c03_04":3,"c04_01":4,"c04_01a":4,"c04_02":4,"c04_02a":4,"c04_03":4,"c04_04_clean":4,"c04_04_clash":4,"c05_01":5,"c05_02":5,"c05_03_quiet":5,"c05_03_alarm":5,"c05_04":5,"c06_01":6,"c06_02":6,"c06_02a":6,"c06_03":6,"c06_04_safe":6,"c06_04_spotted":6,"c07_01":7,"c07_02":7,"c07_02a":7,"c07_03":7,"c07_04_clean":7,"c07_04_chaos":7,"c07_05":7,"c08_01":8,"c08_02":8,"c08_02a":8,"c08_03":8,"c08_04_escape":8,"c08_04_ambush":8,"c08_05":8,"c09_01":9,"c09_02":9,"c09_02a":9,"c09_03_clean":9,"c09_03_hard":9,"c09_04":9,"c10_01":10,"c10_01a":10,"c10_02":10,"c10_02a":10,"c10_03":10,"c10_03a":10,"c11_01":11,"c11_02":11,"c11_02a":11,"c11_03":11,"c11_04_clean":11,"c11_04_spotted":11,"c12_01":12,"c12_02":12,"c12_02a":12,"c12_03_saved":12,"c12_03_overload":12,"c12_04":12,"c13_01":13,"c13_02":13,"c13_02a":13,"c13_03":13,"c13_04_clean":13,"c13_04_hard":13,"c14_01":14,"c14_02":14,"c14_02a":14,"c14_03":14,"c14_04_clean":14,"c14_04_hard":14,"c15_01":15,"c15_02":15,"c15_02a":15,"c15_03":15,"c16_01":16,"c16_02":16,"c16_02a":16,"c16_03":16,"c16_04_clean":16,"c16_04_hard":16,"c17_01":17,"c17_01a":17,"c17_02":17,"c17_03_clean":17,"c17_03_hard":17,"c18_01":18,"c18_01a":18,"c18_02":18,"c18_03":18,"c19_01":19,"c19_02":19,"c19_02a":19,"end_01":19,"end_02":19,"end_03":19,"end_04":19,"c01_03d":1,"c01_03e":1,"c01_03f_calm":1,"c01_03f_alarm":1,"c01_04":1,"c15_04":15});
 const STORY_CHAPTER_PATHS = Object.freeze({1:"./chapters/ch01.js",2:"./chapters/ch02.js",3:"./chapters/ch03.js",4:"./chapters/ch04.js",5:"./chapters/ch05.js",6:"./chapters/ch06.js",7:"./chapters/ch07.js",8:"./chapters/ch08.js",9:"./chapters/ch09.js",10:"./chapters/ch10.js",11:"./chapters/ch11.js",12:"./chapters/ch12.js",13:"./chapters/ch13.js",14:"./chapters/ch14.js",15:"./chapters/ch15.js",16:"./chapters/ch16.js",17:"./chapters/ch17.js",18:"./chapters/ch18.js",19:"./chapters/ch19.js",prologue:"./chapters/prologue.js"});
 
 const STORY_CHAPTER_PROJECTIONS = Object.freeze({"1":{"min":7361,"max":7399},"2":{"min":6351,"max":7315},"3":{"min":6858,"max":7236},"4":{"min":6530,"max":6857},"5":{"min":7123,"max":7371},"6":{"min":6545,"max":7108},"7":{"min":7608,"max":7705},"8":{"min":7514,"max":7994},"9":{"min":5240,"max":6182},"10":{"min":7322,"max":7387},"11":{"min":4426,"max":4715},"12":{"min":6840,"max":6976},"13":{"min":5628,"max":6306},"14":{"min":5159,"max":5241},"15":{"min":4716,"max":4732},"16":{"min":4887,"max":4961},"17":{"min":3014,"max":3265},"18":{"min":4247,"max":4385},"19":{"min":2852,"max":3022},"20":{"min":695,"max":1055}});
@@ -1633,7 +1633,12 @@ const DOSSIER_DATA = [
       { flag: "УБЕДИЛ_СЕЛЕНА_АРХИВОМ", text: "Вы доказали стабилизацию сети Земли архивом Небесного Зеркала." },
       { flag: "ПОСТАВИЛ_ЩИТ_НАД_ЗЕМЛЁЙ", text: "Вы создали резонансный щит над Землёй при помощи Лиор’Саэна и антенны «Искры»." },
       { flag: "ПОСЛАЛ_КОД_ОТБОЯ_ФЛОТУ", text: "Вы отправили флоту Андромеды сигнал отмены тревоги." },
-      { flag: "ОРБИТАЛЬНЫЙ_УДАР_ОТМЕНЁН", text: "Орбитальный удар по четырём древним маякам был отменён." }
+      { flag: "ОРБИТАЛЬНЫЙ_УДАР_ОТМЕНЁН", text: "Орбитальный удар по четырём древним маякам был отменён." },
+      { flag: "ЗЕМЛЯ_СПАСЕНА_ОТ_УДАРА", text: "Селен отменил протокол стерилизации и признал Землю охраняемым миром." },
+      { flag: "СЕЛЕН_УВАЖАЕТ_АЭРХИСА", text: "Селен признал ценность опыта Аэ́рхиса и Лиор’Саэна, полученного на Земле." },
+      { flag: "ПЕРЕДАЛ_ВЕСТЬ_КАЙЛЕНУ_И_ВЕРЕ", text: "Вы попросили Селена передать Наставнику Кайлену и инженеру Вера’Лин весть о том, что вы живы." },
+      { flag: "ПОЛУЧИЛ_МАНДАТ_СТРАЖА_СЕТИ", text: "Вы запросили полномочия на защиту земных ретрансляторов от корпоративного вмешательства." },
+      { flag: "СЕЛЕН_СПАС_КАЙЛЕНА_И_ВЕРУ", text: "Селен снял подозрения с Кайлена и Вера’Лин и взял Куратора Сорена под стражу." }
     ]
   }
 
@@ -2963,6 +2968,7 @@ function nodeChapterNo(node, id) {
   if (isPrologueNodeId(id)) return 0;
   const raw = node && node.chapter && node.chapter.no;
   if (raw != null && Number.isFinite(Number(raw))) return Math.max(0, Number(raw));
+  if (node && node.isEnding && Number.isFinite(Number(node.chapter))) return Math.max(1, Math.floor(Number(node.chapter)));
   const match = String(id || "").match(/^c(\d+)_/);
   if (match) return Number(match[1]);
   const current = st && (st.currentChapter != null ? Number(st.currentChapter) : Number(st.chap));
@@ -2971,6 +2977,10 @@ function nodeChapterNo(node, id) {
 function chapterNumberForState(target = st) {
   if (!target || typeof target !== "object") return 1;
   if (isPrologueNodeId(target.node)) return 0;
+  if (target.node && STORY_DATA.nodes[target.node] && STORY_DATA.nodes[target.node].isEnding) {
+    const endingChapterNo = nodeChapterNo(STORY_DATA.nodes[target.node], target.node);
+    if (Number.isFinite(endingChapterNo)) return endingChapterNo;
+  }
   if (target.node && STORY_NODE_CHAPTER[target.node] != null) {
     const key = STORY_NODE_CHAPTER[target.node];
     return key === "prologue" ? 0 : Number(key);
@@ -3883,8 +3893,9 @@ async function enter(id) {
       (st.queue || []).some(item => item && item.k === "hd" && Number(item.no) === chapterHeaderNo);
     if (!headerAlreadyPresent && chapterHeaderNo !== Number(st.shownChapterHeader)) {
       // Крупный книжный заголовок появляется только при первом входе в главу.
-      // draw() помещает его в #chat — обычную прокручиваемую ленту сообщений.
-      st.queue.unshift({ k: "hd", t: n.chapter.title, no: chapterHeaderNo, pages: chapterHeaderPageText(chapterHeaderNo) });
+      // Узлы используют chapter как номер и chapterTitle как подпись; объектная форма тоже поддерживается.
+      const chapterHeaderTitle = (n.chapter && typeof n.chapter === "object" && n.chapter.title) || n.chapterTitle || (typeof n.chapter === "string" ? n.chapter : "") || (chapterHeaderNo === 20 ? "ЭПИЛОГ" : "ГЛАВА " + chapterHeaderNo);
+      st.queue.unshift({ k: "hd", t: chapterHeaderTitle, no: chapterHeaderNo, pages: chapterHeaderPageText(chapterHeaderNo) });
       st.shownChapterHeader = chapterHeaderNo;
       save();
     } else if (headerAlreadyPresent) {
@@ -4796,6 +4807,7 @@ function viewCompletedRoute(route) {
 function chronologyChapter(nodeId) {
   const id = String(nodeId || "");
   if (/^p01_/i.test(id)) return 0;
+  if (/^end_\d+/i.test(id)) return 20;
   const match = id.match(/^c(\d+)_/i);
   return match ? Math.max(1, Math.min(19, Number(match[1]))) : null;
 }
@@ -5709,7 +5721,14 @@ function showFinal(dead) {
   A("h2", dead ? M.deathTitle : (n.endingTitle || def.title || "Финал"), "fh" + (dead ? " bad" : ""));
   A("div", num ? "Концовка " + num + " из " + M.endingTotal + (dead ? ": " + def.title : "") + (fresh ? "   ✦ НОВАЯ КОНЦОВКА" : "") : "Этот финал не входит в число концовок", "fs");
   ep && A("p", ep, "fe");
-  if (temporalJustUnlocked) { const p=A("p", "✦ ОТКРЫТА ХРОНОЛОГИЯ. Теперь можно вернуться к прежним решениям, изменить их и увидеть другую версию событий. Также открыт канал связи T2.", "temporal-panel"); }
+  if (temporalJustUnlocked) { A("p", "✦ ОТКРЫТА ХРОНОЛОГИЯ. Теперь можно вернуться к прежним решениям, изменить их и увидеть другую версию событий. Также открыт канал связи T2.", "temporal-panel"); }
+  const timelineAction = !dead && Array.isArray(n.choices) ? n.choices.find(choice => choice && choice.action === "openTimeline") : null;
+  if (timelineAction && isChronicleUnlocked()) {
+    const timelineButton = A("button", timelineAction.text || "Открыть Хронологию и попробовать другую ветку (Т2)");
+    timelineButton.type = "button";
+    timelineButton.style.cssText = "text-align:center;margin:10px 0;width:100%";
+    timelineButton.onclick = () => openChronologyFromSplash();
+  }
   A("h3", "Карточка Наблюдателя"); KV([["Позывной", st.hero], ["Архетип", st.arch], ["Навыки", st.skills.join(", ")]]);
   A("h3", "Итоговая телеметрия"); KV([[LB.hp, st.hp + " / 20"], [LB.o2, st.o2 + "%"], [LB.en, st.en + "%"], [LB.ammo, st.ammo]]);
   A("h3", "Статистика прохождения");
